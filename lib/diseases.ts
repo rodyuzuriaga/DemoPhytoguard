@@ -18,6 +18,7 @@ export interface DiseaseInfo {
   medidas_preventivas: string[];
   plan_tratamiento: string[];
   link_experto: string;
+  imagen?: string;
 }
 
 // Ejemplo de uso:
@@ -58,8 +59,48 @@ export const DISEASES: DiseaseInfo[] = [
       "Fase 2: Control Cultural - Podar y eliminar todas las ramas y hojas afectadas. Quemar o desechar lejos del huerto.",
       "Fase 3: Prevención - Aplicar tratamiento preventivo en primavera antes de la apertura de yemas con cobre."
     ],
-    link_experto: "https://www.example.com/apple-scab"
-  }
+    link_experto: "https://www.canr.msu.edu/ipm/diseases/apple_scab",
+    imagen: "https://media.istockphoto.com/id/1198930372/es/foto/manchas-y-grietas-necróticas-causaron-costra-de-manzana-venturia-inaequalis-en-una-manzana.jpg?s=612x612&w=0&k=20&c=xPpxUPKI72EJhPHRWXbgLWjp2v879C_VRRLLNW44VMQ="
+  },
+  {
+    id: 1,
+    class_name_en: "Apple___Black_rot",
+    class_name_es: "Manzano___Pudrición negra del manzano",
+    nombre_mostrar: "Pudrición negra del manzano",
+    categoria: "Hongo",
+    estado: "Infectada",
+    afecta_a: ["Manzana"],
+    nivel_severidad: "Alta",
+    descripcion: "Causada por el hongo Botryosphaeria obtusa, esta enfermedad afecta frutas, hojas y madera. Puede causar pérdidas significativas si no se controla.",
+    sintomas: [
+      "Lesiones negras y hundidas en la fruta, a menudo comenzando en el extremo calicino.",
+      "Frutas momificadas que permanecen en el árbol.",
+      "Manchas foliares de 'ojo de rana' (lesiones púrpuras que se vuelven marrones con un centro más claro).",
+      "Cancros en ramas y tronco."
+    ],
+    recomendaciones_organico: [
+      "Poda sanitaria de ramas y cancros infectados.",
+      "Eliminación de frutas momificadas y restos de poda.",
+      "Aplicación de caldos sulfocálcicos durante la dormancia."
+    ],
+    tratamiento_quimico: [
+      "Fungicidas como Captan o Tiofanato-metilo aplicados según calendario.",
+      "Mancozeb puede ser efectivo en aplicaciones preventivas."
+    ],
+    causa: "Hongo Botryosphaeria obtusa, que sobrevive en madera muerta y frutos momificados. Las esporas se dispersan por lluvia y viento, infectando a través de heridas.",
+    medidas_preventivas: [
+      "Mantener la sanidad del huerto eliminando fuentes de inóculo.",
+      "Proteger heridas de poda.",
+      "Asegurar buena circulación de aire."
+    ],
+    plan_tratamiento: [
+      "Invierno: Poda sanitaria y aplicación de fungicida de dormancia.",
+      "Primavera/Verano: Aplicaciones de fungicidas preventivos y curativos según presión de la enfermedad.",
+      "Monitoreo constante para detectar primeros síntomas."
+    ],
+    link_experto: "http://extension.cropsciences.illinois.edu/fruitveg/pdfs/806_Black_Rot_of_Apple-20015.pdf",
+    imagen: "https://eyouagro.com/nitropack_static/GhaDBUVOndLsFPXiTFGggwyXxhpvLBrk/assets/images/optimized/rev-ce48c26/eyouagro.com/wp-content/uploads/2021/08/pests-apple-scab-opt-edited.jpg"
+  },
   // ...agrega aquí los objetos de cada clase...
 ];
 

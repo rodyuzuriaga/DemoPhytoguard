@@ -45,6 +45,7 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { useMobile } from "@/hooks/use-mobile"
 import Image from "next/image"
+import { DISEASES } from "../lib/diseases" // Ajusta el path si es necesario
 
 interface ExperimentalSpaceProps {
   onExit: () => void
@@ -276,80 +277,19 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     { name: "Número de clases", value: 32, change: 0, unit: "" },
   ])
 
-  const [diseases] = useState([
-    {
-      id: "1",
-      name: "Sarna del manzano",
-      type: "Fungus",
-      fruit: "Manzana",
-      severity: "Alta",
-      description:
-        "Enfermedad fúngica causada por Venturia inaequalis. Se caracteriza por lesiones oscuras y escamosas en la superficie de la fruta y las hojas.",
-      symptoms: [
-        "Manchas circulares de color verde oliva a negro",
-        "Lesiones escamosas",
-        "Deformación de frutos jóvenes",
-      ],
-      treatment: ["Fungicidas preventivos", "Podar y destruir hojas infectadas", "Mantener buena circulación de aire"],
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: "2",
-      name: "Mildiu polvoriento",
-      type: "Fungus",
-      fruit: "Uva",
-      severity: "Media",
-      description: "Enfermedad fúngica común en viñedos. Aparece como un polvo blanco en hojas y frutos.",
-      symptoms: ["Polvo blanco en hojas y frutos", "Manchas amarillentas", "Deformación de hojas"],
-      treatment: ["Aplicar fungicidas a base de azufre", "Mejorar la circulación de aire", "Podar adecuadamente"],
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: "3",
-      name: "Fuego bacteriano",
-      type: "Bacteria",
-      fruit: "Pera",
-      severity: "Alta",
-      description:
-        "Enfermedad bacteriana grave que afecta a frutales de pepita. Causa la muerte de ramas y puede matar árboles enteros.",
-      symptoms: ["Hojas y ramas con aspecto quemado", "Exudados bacterianos", "Marchitez rápida"],
-      treatment: ["Poda sanitaria agresiva", "Antibióticos en floración", "Eliminación de árboles muy afectados"],
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: "4",
-      name: "Tristeza de los cítricos",
-      type: "Virus",
-      fruit: "Naranja",
-      severity: "Alta",
-      description: "Enfermedad viral devastadora que afecta a los cítricos, especialmente naranjos y limoneros.",
-      symptoms: ["Decaimiento general", "Amarillamiento", "Muerte regresiva"],
-      treatment: ["Uso de portainjertos resistentes", "Control de áfidos vectores", "No tiene cura directa"],
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: "5",
-      name: "Araña roja",
-      type: "Mite",
-      fruit: "Fresa",
-      severity: "Media",
-      description: "Ácaro que afecta a numerosos cultivos. Causa daños al alimentarse de la savia de las hojas.",
-      symptoms: ["Punteado amarillento", "Telarañas finas", "Bronceado de hojas"],
-      treatment: ["Acaricidas específicos", "Control biológico", "Aumentar la humedad ambiental"],
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: "6",
-      name: "Deficiencia de hierro",
-      type: "Deficiency",
-      fruit: "Múltiples",
-      severity: "Media",
-      description: "Trastorno nutricional común que causa clorosis intervenal en hojas jóvenes.",
-      symptoms: ["Amarillamiento entre nervaduras", "Hojas jóvenes afectadas primero", "Crecimiento reducido"],
-      treatment: ["Aplicación de quelatos de hierro", "Corrección del pH del suelo", "Fertilizantes foliares"],
-      image: "/placeholder.svg?height=200&width=200",
-    },
-  ])
+  const [diseases] = useState(
+    DISEASES.map((d) => ({
+      id: String(d.id),
+      name: d.nombre_mostrar,
+      type: d.categoria === "Hongo" ? "Fungus" : d.categoria === "Bacteria" ? "Bacteria" : d.categoria === "Virus" ? "Virus" : d.categoria === "Ácaro" ? "Mite" : d.categoria === "Deficiencia" ? "Deficiency" : d.categoria,
+      fruit: d.afecta_a.join(", "),
+      severity: d.nivel_severidad,
+      description: d.descripcion,
+      symptoms: d.sintomas,
+      treatment: [...d.recomendaciones_organico, ...d.tratamiento_quimico],
+      image: d.imagen || "/placeholder.svg?height=200&width=200"
+    }))
+  )
 
   const filteredDiseases = diseases.filter((disease) => {
     const matchesSearch =
@@ -1371,11 +1311,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           <p className={textMuted}>Gestiona y revisa todos tus análisis anteriores</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white">
+          <Button variant="outline" className="border-[#1e4976] !text-[#0a1929] hover:bg-[#132f4c] hover:!text-white">
             <Filter className="h-4 w-4 mr-2" />
             Filtrar
           </Button>
-          <Button variant="outline" className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white">
+          <Button variant="outline" className="border-[#1e4976] !text-[#0a1929] hover:bg-[#132f4c] hover:!text-white">
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
@@ -1770,7 +1710,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
 
                     <TabsContent value="chemical" className="mt-4 space-y-4">
                       <ul className="space-y-2">
-                        {selectedDisease.type === "Fungus" ? (
+                                               {selectedDisease.type === "Fungus" ? (
                           <>
                             <li className={`flex items-start text-sm ${textSecondary}`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
@@ -1969,11 +1909,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <p className={textMuted}>Explora información detallada sobre diversas enfermedades de las plantas</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white">
+              <Button variant="outline" className="border-[#1e4976] !text-[#0a1929] hover:bg-[#132f4c] hover:!text-white">
                 <Filter className="h-4 w-4 mr-2" />
                 Filtrar
               </Button>
-              <Button variant="outline" className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white">
+              <Button variant="outline" className="border-[#1e4976] !text-[#0a1929] hover:bg-[#132f4c] hover:!text-white">
                 <Download className="h-4 w-4 mr-2" />
                 Exportar
               </Button>
@@ -1997,11 +1937,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 onChange={(e) => setSelectedCategory(e.target.value === "" ? null : e.target.value)}
               >
                 <option value="">Todas las categorías</option>
-                <option value="Fungus">Fungus</option>
+                <option value="Fungus">Hongo</option>
                 <option value="Bacteria">Bacteria</option>
                 <option value="Virus">Virus</option>
-                <option value="Mite">Mite</option>
-                <option value="Deficiency">Deficiency</option>
+                <option value="Ácaro">Mite</option>
+                <option value="Deficiency">Deficiencia</option>
               </select>
             </div>
           </div>

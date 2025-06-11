@@ -56,7 +56,7 @@ interface DiagnosticItem {
   name: string
   type: string
   date: string
-  status: "healthy" | "infected"
+  status: "saludable" | "infectada"
   disease?: string
   image: string
   archived: boolean
@@ -222,30 +222,30 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     {
       id: "1",
       name: "Manzana",
-      type: "Fungus",
+      type: "Hongo",
       date: "5 Mayo, 2025",
-      status: "infected",
-      disease: "Sarna del manzano",
-      image: "/placeholder.svg?height=100&width=100",
+      status: "infectada",
+      disease: "Roña del manzano",
+      image: "https://fff.hort.purdue.edu/wp-content/uploads/2022/04/4.jpg",
       archived: false,
     },
     {
       id: "2",
       name: "Naranja",
-      type: "Healthy",
+      type: "Saludable",
       date: "4 Mayo, 2025",
-      status: "healthy",
-      image: "/placeholder.svg?height=100&width=100",
+      status: "saludable",
+      image: "https://s.libertaddigital.com/2017/05/04/dekopon-fruit.jpg",
       archived: false,
     },
     {
       id: "3",
       name: "Uva",
-      type: "Fungus",
+      type: "Hongo",
       date: "2 Mayo, 2025",
-      status: "infected",
+      status: "infectada",
       disease: "Mildiu polvoriento",
-      image: "/placeholder.svg?height=100&width=100",
+      image: "https://www.vinetur.com/imagenes/2020/octubre/8/oidio.jpg",
       archived: false,
     },
     {
@@ -253,18 +253,18 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       name: "Pera",
       type: "Bacteria",
       date: "1 Mayo, 2025",
-      status: "infected",
+      status: "infectada",
       disease: "Fuego bacteriano",
-      image: "/placeholder.svg?height=100&width=100",
+      image: "https://imagenes.cope.es/files/content_image/uploads/2025/03/03/67c58c2e63147.jpeg",
       archived: true,
     },
     {
       id: "5",
       name: "Fresa",
-      type: "Healthy",
+      type: "Saludable",
       date: "30 Abril, 2025",
-      status: "healthy",
-      image: "/placeholder.svg?height=100&width=100",
+      status: "saludable",
+      image: "https://e00-expansion.uecdn.es/assets/multimedia/imagenes/2022/06/15/16552793270812.jpg",
       archived: false,
     },
   ])
@@ -525,7 +525,14 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
         tipo: disease ? disease.categoria : "-",
       });
       // Determinar status correcto
-      const status: "healthy" | "infected" = (detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy")) ? "healthy" : "infected";
+      const status: "saludable" | "infectada" =
+        (detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy")) ||
+        (detection.class_name_es && (
+          detection.class_name_es.toLowerCase().includes("sano") ||
+          detection.class_name_es.toLowerCase().includes("saludable")
+        ))
+          ? "saludable"
+          : "infectada";
       // Agregar al historial de diagnósticos con tipado correcto
       const newDiagnostic: DiagnosticItem = {
         id: String(Date.now()),
@@ -596,14 +603,14 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
   const showTreatmentPlan = useCallback(() => {
     toast({
       title: "Plan de tratamiento generado",
-      description: "Se ha creado un plan personalizado para tratar la Sarna del manzano.",
+      description: "Se ha creado un plan personalizado para tratar la Roña del manzano.",
     })
 
     // Aquí se podría abrir un modal con el plan detallado
     // Por ahora simulamos con un toast adicional
     setTimeout(() => {
       toast({
-        title: "Plan de Tratamiento: Sarna del Manzano",
+        title: "Plan de Tratamiento: Roña del Manzano",
         description:
           "Fase 1: Aplicar fungicida Captan (2g/L) cada 7-10 días. Fase 2: Podar ramas afectadas. Fase 3: Tratamiento preventivo en primavera.",
       })
@@ -833,7 +840,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             <Button
               variant="outline"
               size="sm"
-              className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+              className="border-[#1e4976] text-[#132f4c] hover:bg-[#132f4c] hover:text-white"
               onClick={() => setActiveSection("diagnostics")}
             >
               Ver Todos
@@ -851,7 +858,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
                 className={`border ${
-                  item.status === "infected"
+                  item.status === "infectada"
                     ? "border-amber-900/30 bg-amber-900/10"
                     : "border-emerald-900/30 bg-emerald-900/10"
                 } rounded-lg p-3`}
@@ -872,16 +879,16 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         <h4 className={`font-medium ${textColor} truncate`}>{item.name}</h4>
                         <p
                           className={`text-sm ${
-                            item.status === "infected" ? "text-amber-400" : "text-emerald-400"
+                            item.status === "infectada" ? "text-amber-400" : "text-emerald-400"
                           } truncate`}
                         >
-                          {item.status === "infected" ? item.disease : "Saludable"}
+                          {item.status === "infectada" ? item.disease : "Saludable"}
                         </p>
                       </div>
                       <Badge
                         variant="outline"
                         className={
-                          item.status === "infected"
+                          item.status === "infectada"
                             ? "bg-amber-900/20 text-amber-400 border-amber-900/50"
                             : "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
                         }
@@ -1252,8 +1259,12 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       <h3 className={`text-xl font-bold ${textColor}`}>{analysisResult.nombre}</h3>
                       <div className="flex flex-wrap gap-2 items-center">
                         <span className={`text-sm ${accentColor}`}>Confianza: {(analysisResult.confianza * 100).toFixed(1)}%</span>
-                        <span className={`text-sm ${textSecondary}`}>Planta: {analysisResult.planta}</span>
-                        <span className={`text-sm ${analysisResult.estado === "Saludable" ? "text-emerald-400" : "text-amber-400"}`}>Estado: {analysisResult.estado}</span>
+                        <span className={`text-sm ${textSecondary}`}>
+                          Planta: <span className="font-bold">{analysisResult.planta}</span>
+                        </span>
+                        <span className={`text-sm ${analysisResult.estado === "Saludable" ? "text-emerald-400" : "text-amber-400"}`}>
+                          Estado: <span className="font-bold">{analysisResult.estado}</span>
+                        </span>
                       </div>
                     </div>
                     {/* Descripción */}
@@ -1286,6 +1297,25 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       </CardContent>
                     </Card>
 
+                    {/* Plan de Tratamiento */}
+                    {showTreatment && Array.isArray(analysisResult.plan_tratamiento) && analysisResult.plan_tratamiento.length > 0 && (
+                      <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm mt-4`}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className={`${textColor}`}>Plan de Tratamiento</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            {analysisResult.plan_tratamiento.map((plan: string, idx: number) => (
+                              <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
+                                <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
+                                <span>{plan}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    )}
+                    
                     {/* Botones Plan de Tratamiento y Consultar Experto */}
                     {Array.isArray(analysisResult.plan_tratamiento) && analysisResult.plan_tratamiento.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-0.81">
@@ -1308,24 +1338,6 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       </div>
                     )}
 
-                    {/* Plan de Tratamiento */}
-                    {showTreatment && Array.isArray(analysisResult.plan_tratamiento) && analysisResult.plan_tratamiento.length > 0 && (
-                      <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm mt-4`}>
-                        <CardHeader className="pb-2">
-                          <CardTitle className={`${textColor}`}>Plan de Tratamiento</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="space-y-2">
-                            {analysisResult.plan_tratamiento.map((plan: string, idx: number) => (
-                              <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
-                                <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                                <span>{plan}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    )}
                   </div>
                 ) : selectedImage ? (
                   <div className="h-full flex flex-col items-center justify-center">
@@ -1425,7 +1437,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <Card key={item.id} className={`${cardBg} ${cardBorder} backdrop-blur-sm overflow-hidden`}>
                 <div
                   className={`h-1 ${
-                    item.status === "infected"
+                    item.status === "infectada"
                       ? "bg-gradient-to-r from-amber-500 to-red-500"
                       : "bg-gradient-to-r from-emerald-500 to-green-500"
                   }`}
@@ -1440,15 +1452,15 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         <div>
                           <h4 className={`text-lg font-medium ${textColor}`}>{item.name}</h4>
                           <p
-                            className={`text-sm ${item.status === "infected" ? "text-amber-400" : "text-emerald-400"}`}
+                            className={`text-sm ${item.status === "infectada" ? "text-amber-400" : "text-emerald-400"}`}
                           >
-                            {item.status === "infected" ? item.disease : "Saludable"}
+                            {item.status === "infectada" ? item.disease : "Saludable"}
                           </p>
                         </div>
                         <Badge
                           variant="outline"
                           className={
-                            item.status === "infected"
+                            item.status === "infectada"
                               ? "bg-amber-900/20 text-amber-400 border-amber-900/50"
                               : "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
                           }
@@ -1460,7 +1472,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       <div className="flex justify-between items-center">
                         <Button
                           variant="outline"
-                          className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+                          className="border-[#1e4976] text-[#132f4c] hover:bg-[#132f4c] hover:text-white"
                           onClick={() => {
                             setSelectedDiagnostic(item)
                             setShowDiagnosticDetails(true)
@@ -1515,7 +1527,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <Card key={item.id} className={`${cardBg} ${cardBorder} backdrop-blur-sm overflow-hidden opacity-70`}>
                 <div
                   className={`h-1 ${
-                    item.status === "infected"
+                    item.status === "infectada"
                       ? "bg-gradient-to-r from-amber-500 to-red-500"
                       : "bg-gradient-to-r from-emerald-500 to-green-500"
                   }`}
@@ -1530,15 +1542,15 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         <div>
                           <h4 className={`text-lg font-medium ${textColor}`}>{item.name}</h4>
                           <p
-                            className={`text-sm ${item.status === "infected" ? "text-amber-400" : "text-emerald-400"}`}
+                            className={`text-sm ${item.status === "infectada" ? "text-amber-400" : "text-emerald-400"}`}
                           >
-                            {item.status === "infected" ? item.disease : "Saludable"}
+                            {item.status === "infectada" ? item.disease : "Saludable"}
                           </p>
                         </div>
                         <Badge
                           variant="outline"
                           className={
-                            item.status === "infected"
+                            item.status === "infectada"
                               ? "bg-amber-900/20 text-amber-400 border-amber-900/50"
                               : "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
                           }
@@ -1550,7 +1562,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       <div className="flex justify-between items-center">
                         <Button
                           variant="outline"
-                          className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+                          className="border-[#1e4976] text-[#132f4c] hover:bg-[#132f4c] hover:text-white"
                           onClick={() => {
                             setSelectedDiagnostic(item)
                             setShowDiagnosticDetails(true)
@@ -1650,7 +1662,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a1929]/90 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4">
                   <Badge
-                    className={`bg-${selectedDisease.type === "Fungus" ? "amber" : selectedDisease.type === "Bacteria" ? "blue" : selectedDisease.type === "Virus" ? "red" : selectedDisease.type === "Mite" ? "purple" : "green"}-900/50 text-${selectedDisease.type === "Fungus" ? "amber" : selectedDisease.type === "Bacteria" ? "blue" : selectedDisease.type === "Virus" ? "red" : selectedDisease.type === "Mite" ? "purple" : "green"}-300`}
+                    className={`bg-${selectedDisease.type === "Hongo" ? "amber" : selectedDisease.type === "Bacteria" ? "blue" : selectedDisease.type === "Virus" ? "red" : selectedDisease.type === "Mite" ? "purple" : "green"}-900/50 text-${selectedDisease.type === "Hongo" ? "amber" : selectedDisease.type === "Bacteria" ? "blue" : selectedDisease.type === "Virus" ? "red" : selectedDisease.type === "Mite" ? "purple" : "green"}-300`}
                   >
                     {selectedDisease.type}
                   </Badge>
@@ -1709,7 +1721,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
 
                     <TabsContent value="organic" className="mt-4 space-y-4">
                       <ul className="space-y-2">
-                        {selectedDisease.type === "Fungus" ? (
+                        {selectedDisease.type === "Hongo" ? (
                           <>
                             <li className={`flex items-start text-sm ${textSecondary}`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
@@ -1790,7 +1802,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
 
                     <TabsContent value="chemical" className="mt-4 space-y-4">
                       <ul className="space-y-2">
-                                               {selectedDisease.type === "Fungus" ? (
+                                               {selectedDisease.type === "Hongo" ? (
                           <>
                                                        <li className={`flex items-start text-sm ${textSecondary}`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
@@ -1879,7 +1891,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                   </CardHeader>
                   <CardContent>
                     <p className={`${textSecondary}`}>
-                      {selectedDisease.type === "Fungus"
+                      {selectedDisease.type === "Hongo"
                         ? "Hongos patógenos que se desarrollan en condiciones de alta humedad y temperaturas moderadas. La infección se propaga por esporas transportadas por el viento, agua o insectos."
                         : selectedDisease.type === "Bacteria"
                           ? "Bacterias patógenas que ingresan a través de heridas, estomas o por insectos vectores. Se favorecen en ambientes húmedos y cálidos, propagándose rápidamente en condiciones de lluvia."
@@ -1898,7 +1910,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {selectedDisease.type === "Fungus" ? (
+                      {selectedDisease.type === "Hongo" ? (
                         <>
                           <li className={`flex items-start text-sm ${textSecondary}`}>
                             <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
@@ -2000,7 +2012,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4 mt-8 mb-5">
+          <div className="flex items-center space-x-4 mt-6 mb-6">
             <div className="flex-1">
               <input
                 type="text"
@@ -2041,7 +2053,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a1929]/90 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 p-4">
                       <Badge
-                        className={`$ {
+                        className={`${
                           disease.type === "Hongo"
                             ? "bg-amber-900/50 text-amber-300"
                             : disease.type === "Bacteria"
@@ -2469,7 +2481,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                   className="object-contain"
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                  <p className="text-white font-bold text-lg">Sarna del manzano</p>
+                  <p className="text-white font-bold text-lg">Roña del manzano</p>
                   <p className="text-amber-200 text-sm">Confianza: 98.7%</p>
                 </div>
               </div>
@@ -2494,7 +2506,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                     </div>
                     <div>
                       <p className={`text-sm ${textMuted}`}>Tipo</p>
-                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.type || "Fungus"}</p>
+                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.type || "Hongo"}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -2506,7 +2518,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 </CardHeader>
                 <CardContent>
                   <p className={`text-sm ${textSecondary}`}>
-                    La sarna del manzano es una enfermedad fúngica causada por Venturia inaequalis. Se caracteriza por
+                    La roña del manzano es una enfermedad fúngica causada por Venturia inaequalis. Se caracteriza por
                     lesiones oscuras y escamosas en la superficie de la fruta.
                   </p>
                 </CardContent>

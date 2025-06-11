@@ -176,9 +176,9 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
   const isMobile = useMobile()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [activeSection, setActiveSection] = useState("dashboard")
-  const [isCapturing, setIsCapturing] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -192,6 +192,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
   const [locationPermissionGranted, setLocationPermissionGranted] = useState(false)
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [analysisResult, setAnalysisResult] = useState<any | null>(null)
+  const [diseaseInfo, setDiseaseInfo] = useState<any | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedDisease, setSelectedDisease] = useState<any | null>(null)
   const [showDiseaseDetails, setShowDiseaseDetails] = useState(false)
@@ -281,7 +282,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     DISEASES.map((d) => ({
       id: String(d.id),
       name: d.nombre_mostrar,
-      type: d.categoria === "Hongo" ? "Fungus" : d.categoria === "Bacteria" ? "Bacteria" : d.categoria === "Virus" ? "Virus" : d.categoria === "Ácaro" ? "Mite" : d.categoria === "Deficiencia" ? "Deficiency" : d.categoria,
+      type: d.categoria, // <-- ¡En español!
       fruit: d.afecta_a.join(", "),
       severity: d.nivel_severidad,
       description: d.descripcion,
@@ -442,196 +443,113 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     return () => clearInterval(interval)
   }, [animationsEnabled])
 
-  useEffect(() => {
-    if (isAnalyzing) {
-      const interval = setInterval(() => {
-        setLoadingProgress((prev) => {
-          const newProgress = prev + Math.random() * 15
-          return newProgress > 90 ? 90 : newProgress
-        })
-      }, 300)
+  const [backendOffline, setBackendOffline] = useState(false)
 
-      // Simulate analysis completion
-      setTimeout(() => {
-        setLoadingProgress(100)
-        setTimeout(() => {
-          setIsAnalyzing(false)
-          setLoadingProgress(0)
-
-          // Set analysis result
-          const newResult = {
-            fruta: "Manzana",
-            estado: "Infectada",
-            enfermedad: "Sarna del manzano",
-            tipo: "Fungus",
-            descripcion:
-              "La sarna del manzano es una enfermedad fúngica causada por Venturia inaequalis. Se caracteriza por lesiones oscuras y escamosas en la superficie de la fruta.",
-            recomendaciones: [
-              "Aplicar fungicidas preventivos al inicio de la temporada",
-              "Podar y destruir hojas infectadas para reducir la fuente de inóculo",
-              "Mantener buena circulación de aire en el huerto",
-            ],
-          }
-
-          setAnalysisResult(newResult)
-
-          // Add new diagnostic
-          const newDiagnostic: DiagnosticItem = {
-            id: String(Date.now()),
-            name: "Manzana",
-            type: "Fungus",
-            date: "Hoy",
-            status: "infected",
-            disease: "Sarna del manzano",
-            image: selectedImage || "/placeholder.svg?height=100&width=100",
-            archived: false,
-          }
-
-          setDiagnostics((prev) => [newDiagnostic, ...prev])
-
-          // Mostrar notificación solo si están habilitadas
-          if (notificationsEnabled) {
-            toast({
-              title: "Análisis completado",
-              description: "Se ha detectado Sarna del manzano en la muestra analizada.",
-            })
-          }
-        }, 500)
-      }, 3000)
-
-      return () => clearInterval(interval)
-    }
-  }, [isAnalyzing, selectedImage, notificationsEnabled, toast])
-
-  // Guardar configuraciones en localStorage
-  useEffect(() => {
-    if (storageEnabled && typeof window !== "undefined") {
-      localStorage.setItem(
-        "phytoguard-experimental-settings",
-        JSON.stringify({
-          expIsDarkTheme: isDarkTheme,
-          animationsEnabled,
-          notificationsEnabled,
-          storageEnabled,
-        }),
-      )
-    }
-  }, [isDarkTheme, animationsEnabled, notificationsEnabled, storageEnabled])
-
-  // Cargar configuraciones desde localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const savedSettings = localStorage.getItem("phytoguard-experimental-settings")
-        if (savedSettings && storageEnabled) {
-          const settings = JSON.parse(savedSettings)
-          setIsDarkTheme(settings.expIsDarkTheme)
-          setAnimationsEnabled(settings.animationsEnabled)
-          setNotificationsEnabled(settings.notificationsEnabled)
-        }
-      } catch (error) {
-        console.error("Error cargando configuraciones:", error)
-      }
-    }
-  }, [storageEnabled])
-
-  const toggleArchive = useCallback(
-    (id: string) => {
-      setDiagnostics((prev) => prev.map((item) => (item.id === id ? { ...item, archived: !item.archived } : item)))
-
-      if (notificationsEnabled) {
-        toast({
-          title: "Diagnóstico actualizado",
-          description: "El estado de archivo ha sido actualizado.",
-        })
-      }
-    },
-    [notificationsEnabled, toast],
-  )
-
-  const deleteDiagnostic = useCallback(
-    (id: string) => {
-      setDiagnostics((prev) => prev.filter((item) => item.id !== id))
-
-      if (notificationsEnabled) {
-        toast({
-          title: "Diagnóstico eliminado",
-          description: "El diagnóstico ha sido eliminado permanentemente.",
-        })
-      }
-    },
-    [notificationsEnabled, toast],
-  )
-
-  const captureImage = useCallback(() => {
-    setIsCapturing(true)
+  const analyzeImage = useCallback(async () => {
+    if (!selectedImage && !selectedFile) return;
+    setIsAnalyzing(true);
+    setBackendOffline(false);
+    setLoadingProgress(10);
     try {
-      // Simulate camera capture
+      let file = selectedFile;
+      if (!file && selectedImage && selectedImage.startsWith("data:")) {
+        const arr = selectedImage.split(",");
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        file = new File([u8arr], "captura.jpg", { type: mime });
+      }
+      if (!file) {
+        setIsAnalyzing(false);
+        toast({ title: "Error", description: "No se pudo procesar la imagen.", variant: "destructive" });
+        return;
+      }
+      let progress = 10;
+      const progressInterval = setInterval(() => {
+        progress = Math.min(progress + Math.random() * 15, 95);
+        setLoadingProgress(progress);
+      }, 300);
+      const { predictImageFromFile, BACKEND_URL_LOCAL } = await import("../lib/predict");
+      const result = await predictImageFromFile(file, BACKEND_URL_LOCAL);
+      console.log('Respuesta del backend:', result);
+      clearInterval(progressInterval);
+      setLoadingProgress(100);
       setTimeout(() => {
-        setSelectedImage("/placeholder.svg?height=400&width=400")
-        setIsCapturing(false)
-        // Reset analysis result when capturing new image
-        setAnalysisResult(null)
-
-        if (notificationsEnabled) {
-          toast({
-            title: "Imagen capturada",
-            description: "La imagen ha sido capturada correctamente.",
-          })
-        }
-      }, 1500)
+        setIsAnalyzing(false);
+        setLoadingProgress(0);
+      }, 400);
+      if (result.backendOffline) {
+        setBackendOffline(true);
+        setAnalysisResult(null);
+        return;
+      }
+      setBackendOffline(false);
+      // Si el backend devuelve detections como array, usar la primera detección
+      let detection = result;
+      if (Array.isArray(result.detections) && result.detections.length > 0) {
+        detection = result.detections[0];
+      }
+      // Emparejar por id, class_name_en o class_name_es
+      let disease = null;
+      if (detection.id !== undefined) {
+        disease = DISEASES.find(d => String(d.id) === String(detection.id));
+      }
+      if (!disease && detection.class_name_en) {
+        disease = DISEASES.find(d => d.class_name_en === detection.class_name_en);
+      }
+      if (!disease && detection.class_name_es) {
+        disease = DISEASES.find(d => d.class_name_es === detection.class_name_es);
+      }
+      // Imagen procesada (con boxes)
+      let processedImage = selectedImage;
+      if (result.image_with_boxes) {
+        processedImage = result.image_with_boxes.startsWith('data:')
+          ? result.image_with_boxes
+          : `data:image/jpeg;base64,${result.image_with_boxes}`;
+      }
+      setAnalysisResult({
+        nombre: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
+        confianza: detection.confidence || 0,
+        planta: disease ? disease.afecta_a.join(", ") : "-",
+        estado: detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy") ? "Saludable" : "Infectada",
+        descripcion: disease ? disease.descripcion : "No se encontró información en la base de datos local.",
+        recomendaciones: disease ? disease.recomendaciones_organico : [],
+        plan_tratamiento: disease ? disease.plan_tratamiento : [],
+        link_experto: disease ? disease.link_experto : "",
+        imagen: processedImage,
+        tipo: disease ? disease.categoria : "-",
+      });
+      // Determinar status correcto
+      const status: "healthy" | "infected" = (detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy")) ? "healthy" : "infected";
+      // Agregar al historial de diagnósticos con tipado correcto
+      const newDiagnostic: DiagnosticItem = {
+        id: String(Date.now()),
+        name: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
+        type: disease ? disease.categoria : "-",
+        date: new Date().toLocaleDateString(),
+        status,
+        disease: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
+        image: processedImage || "/placeholder.svg?height=100&width=100",
+        archived: false,
+      };
+      setDiagnostics((prev) => [newDiagnostic, ...prev]);
+      if (notificationsEnabled) {
+        toast({
+          title: "Análisis completado",
+          description: `Se ha detectado ${disease ? disease.nombre_mostrar : (result.class_name_es || result.class_name_en || "Desconocido")}`,
+        });
+      }
     } catch (err) {
-      setIsCapturing(false)
-
-      if (notificationsEnabled) {
-        toast({
-          title: "Error",
-          description: "No se pudo acceder a la cámara. Por favor verifica los permisos.",
-          variant: "destructive",
-        })
-      }
+      setIsAnalyzing(false);
+      setBackendOffline(true);
+      setAnalysisResult(null);
     }
-  }, [notificationsEnabled, toast])
-
-  const handleFileUpload = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0]
-      if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setSelectedImage(e.target.result as string)
-            // Reset analysis result when uploading new image
-            setAnalysisResult(null)
-
-            if (notificationsEnabled) {
-              toast({
-                title: "Imagen cargada",
-                description: "La imagen ha sido cargada correctamente.",
-              })
-            }
-          }
-        }
-        reader.readAsDataURL(file)
-      }
-    },
-    [notificationsEnabled, toast],
-  )
-
-  const analyzeImage = useCallback(() => {
-    if (!selectedImage) {
-      if (notificationsEnabled) {
-        toast({
-          title: "Error",
-          description: "Por favor selecciona una imagen para analizar.",
-          variant: "destructive",
-        })
-      }
-      return
-    }
-
-    setIsAnalyzing(true)
-  }, [selectedImage, notificationsEnabled, toast])
+  }, [selectedImage, selectedFile, notificationsEnabled, toast])
 
   const toggleTheme = useCallback(() => {
     setIsDarkTheme((prev) => !prev)
@@ -1016,6 +934,85 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
   // Ahora, modificar la función renderAnalyzer para reorganizar en dos columnas
   // Eliminar la sección de diagnósticos recientes y reorganizar el analizador
 
+  // Handler para la subida de archivos de imagen
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setSelectedImage(event.target?.result as string)
+        setAnalysisResult(null)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Estado para mostrar el modal de cámara y guardar el stream
+  const [showCameraModal, setShowCameraModal] = useState(false)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isCameraActive, setIsCameraActive] = useState(false)
+
+  const captureImage = useCallback(async () => {
+    if (!isCameraActive) {
+      // Solicitar permisos y mostrar video
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        setCameraStream(stream)
+        setIsCameraActive(true)
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+        }
+      } catch (err) {
+        toast({
+          title: "Permiso denegado",
+          description: "No se pudo acceder a la cámara. Por favor acepta el permiso en tu navegador.",
+          variant: "destructive",
+        })
+      }
+      return
+    }
+    // Si la cámara ya está activa, tomar la foto
+    if (videoRef.current) {
+      const video = videoRef.current
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
+        setSelectedImage(dataUrl)
+        setAnalysisResult(null)
+        // Detener la cámara
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop())
+          setCameraStream(null)
+          setIsCameraActive(false)
+        }
+        setTimeout(() => {
+          analyzeImage()
+        }, 100)
+        if (notificationsEnabled) {
+          toast({
+            title: "Imagen capturada",
+            description: "La imagen ha sido capturada correctamente.",
+          })
+        }
+      }
+    }
+  }, [isCameraActive, cameraStream, analyzeImage, notificationsEnabled, toast])
+
+  useEffect(() => {
+    if (isCameraActive && videoRef.current && cameraStream) {
+      videoRef.current.srcObject = cameraStream
+    }
+  }, [isCameraActive, cameraStream])
+
+  // Estado para mostrar/ocultar el plan de tratamiento en el análisis
+  const [showTreatment, setShowTreatment] = useState(false);
+
   const renderAnalyzer = () => (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -1084,25 +1081,38 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
 
                       <TabsContent value="camera" className="mt-4">
                         <div className="flex flex-col items-center gap-4">
+                          {isCameraActive && (
+                            <video
+                              ref={videoRef}
+                              autoPlay
+                              playsInline
+                              className="rounded-lg border-2 border-[#1e4976] mb-4 max-w-full max-h-[40vh]"
+                              style={{ width: 400, height: 300 }}
+                            />
+                          )}
                           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
                             <Button
                               size="lg"
                               className={`w-full text-lg py-6 ${buttonBg} ${buttonHover} text-white`}
                               onClick={captureImage}
-                              disabled={isCapturing}
+                              disabled={isAnalyzing}
                             >
-                              {isCapturing ? (
-                                <span className="flex items-center">
-                                  <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
-                                  Capturando...
-                                </span>
-                              ) : (
-                                <span className="flex items-center">
-                                  <Camera className="mr-2 h-5 w-5" />
-                                  Tomar Foto
-                                </span>
-                              )}
+                              <span className="flex items-center">
+                                <Camera className="mr-2 h-5 w-5" />
+                                {isCameraActive ? "Tomar Foto" : "Abrir cámara"}
+                              </span>
                             </Button>
+                            {isCameraActive && (
+                              <Button variant="outline" className="w-full mt-2" onClick={() => {
+                                if (cameraStream) {
+                                  cameraStream.getTracks().forEach(track => track.stop())
+                                  setCameraStream(null)
+                                }
+                                setIsCameraActive(false)
+                              }}>
+                                Cancelar
+                              </Button>
+                            )}
                           </motion.div>
                         </div>
                       </TabsContent>
@@ -1115,7 +1125,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+                        className="border-[#1e4976] text-[#112b45] hover:bg-[#132f4c] hover:text-white"
                         onClick={() => {
                           setSelectedImage(null)
                           setAnalysisResult(null)
@@ -1197,81 +1207,125 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       Nuestro modelo de IA está procesando la imagen para detectar enfermedades
                     </p>
                   </div>
+                ) : backendOffline ? (
+                  <div className="h-full flex flex-col items-center justify-center">
+                    <Microscope className={`h-12 w-12 text-red-400 animate-pulse mb-4`} />
+                    <h3 className={`text-xl font-medium text-red-200 mb-2`}>El modelo salió a pensar...</h3>
+                    <p className={`text-red-300 text-center`}>
+                      En estos momentos, el servicio de IA no está disponible o el backend está apagado.
+                    </p>
+                  </div>
                 ) : analysisResult ? (
                   <div className="space-y-6">
-                    <div className="flex justify-between items-center mb-2">
+                    {/* Título Imagen Procesada y etiqueta tipo */}
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className={`text-lg font-medium ${textColor}`}>Imagen Procesada</h3>
-                      <Badge className="bg-amber-900/30 text-amber-400 border-amber-900/50">
-                        {analysisResult.tipo}
-                      </Badge>
+                      {analysisResult.tipo && (
+                        <Badge className={
+                          analysisResult.tipo === "Hongo"
+                            ? "bg-amber-900/50 text-amber-300"
+                            : analysisResult.tipo === "Bacteria"
+                            ? "bg-blue-900/50 text-blue-300"
+                            : analysisResult.tipo === "Virus"
+                            ? "bg-red-900/50 text-red-300"
+                            : analysisResult.tipo === "Ácaro"
+                            ? "bg-purple-900/50 text-purple-300"
+                            : analysisResult.tipo === "Deficiencia"
+                            ? "bg-green-900/50 text-green-300"
+                            : "bg-slate-900/50 text-slate-300"
+                        }>
+                          {analysisResult.tipo}
+                        </Badge>
+                      )}
                     </div>
-
-                    <div
-                      className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 border-amber-900/50`}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent z-10"></div>
+                    {/* Imagen procesada */}
+                    <div className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-amber-900/50">
                       <Image
-                        src={selectedImage || "/placeholder.svg"}
+                        src={analysisResult.imagen || "/placeholder.svg"}
                         alt="Imagen procesada"
                         fill
                         className="object-contain"
                       />
-                      <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                        <p className="text-white font-bold text-lg">{analysisResult.enfermedad}</p>
-                        <p className="text-amber-200 text-sm">Confianza: 98.7%</p>
+                    </div>
+                    {/* Info principal */}
+                    <div className="space-y-2">
+                      <h3 className={`text-xl font-bold ${textColor}`}>{analysisResult.nombre}</h3>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <span className={`text-sm ${accentColor}`}>Confianza: {(analysisResult.confianza * 100).toFixed(1)}%</span>
+                        <span className={`text-sm ${textSecondary}`}>Planta: {analysisResult.planta}</span>
+                        <span className={`text-sm ${analysisResult.estado === "Saludable" ? "text-emerald-400" : "text-amber-400"}`}>Estado: {analysisResult.estado}</span>
                       </div>
                     </div>
-
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <h3 className={`text-lg font-medium ${textColor}`}>Información de la muestra</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className={`text-sm ${textMuted}`}>Planta</p>
-                            <p className={`font-medium ${textColor}`}>{analysisResult.fruta}</p>
-                          </div>
-                          <div>
-                            <p className={`text-sm ${textMuted}`}>Estado</p>
-                            <p className="font-medium text-amber-400">{analysisResult.estado}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h3 className={`text-lg font-medium ${textColor}`}>Descripción</h3>
-                        <p className={`text-sm ${textSecondary}`}>{analysisResult.descripcion}</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h3 className={`text-lg font-medium ${textColor}`}>Recomendaciones</h3>
-                        <ul className="space-y-1">
-                          {analysisResult.recomendaciones.map((recomendacion: string, index: number) => (
-                            <li key={index} className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>{recomendacion}</span>
-                            </li>
-                          ))}
+                    {/* Descripción */}
+                    <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className={`${textColor}`}>Descripción</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className={`${textSecondary}`}>{analysisResult.descripcion}</p>
+                      </CardContent>
+                    </Card>
+                    {/* Recomendaciones */}
+                    <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className={`${textColor}`}>Recomendaciones</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2">
+                          {Array.isArray(analysisResult.recomendaciones) && analysisResult.recomendaciones.length > 0 ? (
+                            analysisResult.recomendaciones.map((rec: string, idx: number) => (
+                              <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
+                                <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
+                                <span>{rec}</span>
+                              </li>
+                            ))
+                          ) : (
+                            <li className={`text-sm ${textMuted}`}>No hay recomendaciones disponibles.</li>
+                          )}
                         </ul>
+                      </CardContent>
+                    </Card>
 
-                        <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <Button className={`${buttonBg} ${buttonHover} text-white`} onClick={showTreatmentPlan}>
-                            Plan de Tratamiento
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
-                            onClick={() => {
-                              toast({
-                                title: "Alerta enviada",
-                                description: "Se ha notificado a los expertos sobre este caso.",
-                              })
-                            }}
+                    {/* Botones Plan de Tratamiento y Consultar Experto */}
+                    {Array.isArray(analysisResult.plan_tratamiento) && analysisResult.plan_tratamiento.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-0.81">
+                        <Button
+                          className={`${buttonBg} ${buttonHover} text-white w-full`}
+                          onClick={() => setShowTreatment((prev: boolean) => !prev)}
+                        >
+                          {showTreatment ? "Ocultar Plan de Tratamiento" : "Plan de Tratamiento"}
+                        </Button>
+                        {analysisResult.link_experto && (
+                          <a
+                            href={analysisResult.link_experto}
+                            className={`${buttonBg} ${buttonHover} text-white w-full flex justify-center items-center rounded-md py-2 text-sm`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
                             Consultar Experto
-                          </Button>
-                        </div>
+                          </a>
+                        )}
                       </div>
-                    </div>
+                    )}
+
+                    {/* Plan de Tratamiento */}
+                    {showTreatment && Array.isArray(analysisResult.plan_tratamiento) && analysisResult.plan_tratamiento.length > 0 && (
+                      <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm mt-4`}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className={`${textColor}`}>Plan de Tratamiento</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            {analysisResult.plan_tratamiento.map((plan: string, idx: number) => (
+                              <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
+                                <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
+                                <span>{plan}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 ) : selectedImage ? (
                   <div className="h-full flex flex-col items-center justify-center">
@@ -1300,6 +1354,32 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       </motion.div>
     </div>
   )
+
+  // Función para archivar/desarchivar diagnósticos
+  const toggleArchive = (id: string) => {
+    setDiagnostics((prev) =>
+      prev.map((diag) =>
+        diag.id === id ? { ...diag, archived: !diag.archived } : diag
+      )
+    )
+    if (notificationsEnabled) {
+      toast({
+        title: "Diagnóstico actualizado",
+        description: "El diagnóstico ha sido " + (diagnostics.find(d => d.id === id)?.archived ? "desarchivado" : "archivado") + ".",
+      })
+    }
+  }
+
+  // Función para eliminar diagnósticos
+  const deleteDiagnostic = (id: string) => {
+    setDiagnostics((prev) => prev.filter((diag) => diag.id !== id))
+    if (notificationsEnabled) {
+      toast({
+        title: "Diagnóstico eliminado",
+        description: "El diagnóstico ha sido eliminado correctamente.",
+      })
+    }
+  }
 
   // Ahora, modificar la función renderDiagnostics para corregir los botones en el historial de diagnósticos
 
@@ -1547,7 +1627,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             </div>
             <Button
               variant="outline"
-              className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+              className="border-[#1e4976] !text-[#0a1929] hover:bg-[#132f4c] hover:text-white"
               onClick={() => {
                 setShowDiseaseDetails(false)
                 setSelectedDisease(null)
@@ -1712,11 +1792,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       <ul className="space-y-2">
                                                {selectedDisease.type === "Fungus" ? (
                           <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
+                                                       <li className={`flex items-start text-sm ${textSecondary}`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
                               <span>Aplicar fungicidas a base de cobre (oxicloruro de cobre)</span>
                             </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
+                            <li className={`flex items-start text-sm ${accentColor} mt-0.5 mr-1 flex-shrink-0`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
                               <span>Utilizar fungicidas sistémicos como Difenoconazol</span>
                             </li>
@@ -1731,7 +1811,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
                               <span>Aplicar bactericidas a base de cobre (sulfato de cobre)</span>
                             </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
+                            <li className={`flex items-start text-sm ${accentColor} mt-0.5 mr-1 flex-shrink-0`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
                               <span>Utilizar antibióticos agrícolas como la estreptomicina</span>
                             </li>
@@ -1854,7 +1934,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                             <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
                             <span>Controlar poblaciones de insectos vectores</span>
                           </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
+                          <li className={`flex items-start text-sm ${accentColor} mt-0.5 mr-1 flex-shrink-0`}>
                             <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
                             <span>Utilizar semillas y material de propagación certificado</span>
                           </li>
@@ -1902,7 +1982,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </div>
         </div>
       ) : (
-        <>
+        <div>
           <div className="flex justify-between items-center">
             <div>
               <h2 className={`text-2xl font-bold ${textColor}`}>Librería de Enfermedades</h2>
@@ -1920,7 +2000,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 mt-8 mb-5">
             <div className="flex-1">
               <input
                 type="text"
@@ -1932,16 +2012,17 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             </div>
             <div>
               <select
+                aria-label="Filtrar por categoría"
                 className={`px-4 py-2 rounded-md border border-[#1e4976] bg-[#132f4c]/50 text-[#e7ebf0] focus:outline-none focus:border-[#66b2ff]`}
                 value={selectedCategory || ""}
                 onChange={(e) => setSelectedCategory(e.target.value === "" ? null : e.target.value)}
               >
                 <option value="">Todas las categorías</option>
-                <option value="Fungus">Hongo</option>
+                <option value="Hongo">Hongo</option>
                 <option value="Bacteria">Bacteria</option>
                 <option value="Virus">Virus</option>
-                <option value="Ácaro">Mite</option>
-                <option value="Deficiency">Deficiencia</option>
+                <option value="Ácaro">Ácaro</option>
+                <option value="Deficiencia">Deficiencia</option>
               </select>
             </div>
           </div>
@@ -1949,13 +2030,30 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDiseases.length > 0 ? (
               filteredDiseases.map((disease) => (
-                <div key={disease.id} className="relative overflow-hidden rounded-lg">
+                <div key={disease.id} className="relative overflow-hidden rounded-lg shadow-lg bg-[#132f4c]/80 cursor-pointer hover:scale-[1.02] transition-transform">
                   <div className="relative h-48">
-                    <Image src={disease.image || "/placeholder.svg"} alt={disease.name} fill className="object-cover" />
+                    <Image
+                      src={disease.image || "/placeholder.svg"}
+                      alt={disease.name}
+                      fill
+                      className="object-cover"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a1929]/90 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 p-4">
                       <Badge
-                        className={`bg-${disease.type === "Fungus" ? "amber" : disease.type === "Bacteria" ? "blue" : disease.type === "Virus" ? "red" : disease.type === "Mite" ? "purple" : "green"}-900/50 text-${disease.type === "Fungus" ? "amber" : disease.type === "Bacteria" ? "blue" : disease.type === "Virus" ? "red" : disease.type === "Mite" ? "purple" : "green"}-300`}
+                        className={`$ {
+                          disease.type === "Hongo"
+                            ? "bg-amber-900/50 text-amber-300"
+                            : disease.type === "Bacteria"
+                            ? "bg-blue-900/50 text-blue-300"
+                            : disease.type === "Virus"
+                            ? "bg-red-900/50 text-red-300"
+                            : disease.type === "Ácaro"
+                            ? "bg-purple-900/50 text-purple-300"
+                            : disease.type === "Deficiencia"
+                            ? "bg-green-900/50 text-green-300"
+                            : "bg-slate-900/50 text-slate-300"
+                        }`}
                       >
                         {disease.type}
                       </Badge>
@@ -1963,7 +2061,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                       <p className="text-white/80 text-sm">Afecta a: {disease.fruit}</p>
                     </div>
                   </div>
-                  <div className="p-4 bg-[#132f4c]/80">
+                  <div className="p-4">
                     <p className={`text-sm ${textSecondary} mb-4 line-clamp-2`}>{disease.description}</p>
                     <Button
                       className={`${buttonBg} ${buttonHover} text-white w-full`}
@@ -1989,7 +2087,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </div>
   )
@@ -2483,6 +2581,36 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Camera Modal */}
+      {showCameraModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="bg-[#132f4c] rounded-lg p-4 flex flex-col items-center relative">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="rounded-lg border-2 border-[#1e4976] mb-4 max-w-full max-h-[60vh]"
+              style={{ width: 400, height: 300 }}
+            />
+            <Button className={`${buttonBg} ${buttonHover} text-white w-full mb-2`} onClick={captureImage}>
+              <span className="flex items-center">
+                <Camera className="mr-2 h-5 w-5" />
+                {isCameraActive ? "Tomar Foto" : "Abrir cámara"}
+              </span>
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => {
+              if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop())
+                setCameraStream(null)
+              }
+              setIsCameraActive(false)
+            }}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

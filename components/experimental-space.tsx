@@ -1315,7 +1315,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         </CardContent>
                       </Card>
                     )}
-                    
+
                     {/* Botones Plan de Tratamiento y Consultar Experto */}
                     {Array.isArray(analysisResult.plan_tratamiento) && analysisResult.plan_tratamiento.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-0.81">
@@ -2577,7 +2577,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <div className="flex justify-end space-x-2 pb-4">
                 <Button
                   variant="outline"
-                  className="border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+                  className="border-[#1e4976] text-[#132f4c] hover:bg-[#132f4c] hover:text-white"
                   onClick={() => setShowDiagnosticDetails(false)}
                 >
                   Cerrar

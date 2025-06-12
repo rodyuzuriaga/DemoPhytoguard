@@ -282,11 +282,15 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     DISEASES.map((d) => ({
       id: String(d.id),
       name: d.nombre_mostrar,
-      type: d.categoria, // <-- ¡En español!
+      type: d.categoria,
       fruit: d.afecta_a.join(", "),
       severity: d.nivel_severidad,
       description: d.descripcion,
       symptoms: d.sintomas,
+      organic: d.recomendaciones_organico, // <--- DINÁMICO
+      chemical: d.tratamiento_quimico,     // <--- DINÁMICO
+      cause: d.causa,                      // <--- DINÁMICO
+      prevention: d.medidas_preventivas,   // <--- DINÁMICO
       treatment: [...d.recomendaciones_organico, ...d.tratamiento_quimico],
       image: d.imagen || "/placeholder.svg?height=200&width=200"
     }))
@@ -522,8 +526,13 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
         plan_tratamiento: disease ? disease.plan_tratamiento : [],
         link_experto: disease ? disease.link_experto : "",
         imagen: processedImage,
-        tipo: disease ? disease.categoria : "-",
+        tipo: disease
+          ? disease.categoria
+          : (detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy"))
+            ? "Saludable"
+            : "-",
       });
+
       // Determinar status correcto
       const status: "saludable" | "infectada" =
         (detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy")) ||
@@ -537,7 +546,18 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       const newDiagnostic: DiagnosticItem = {
         id: String(Date.now()),
         name: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
-        type: disease ? disease.categoria : "-",
+        type: disease
+          ? disease.categoria
+          : (
+              (detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy")) ||
+              (detection.class_name_es && (
+                detection.class_name_es.toLowerCase().includes("sano") ||
+                detection.class_name_es.toLowerCase().includes("sana") ||
+                detection.class_name_es.toLowerCase().includes("saludable")
+              ))
+            )
+            ? "Saludable"
+            : "-",
         date: new Date().toLocaleDateString(),
         status,
         disease: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
@@ -892,7 +912,13 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                             : "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
                         }
                       >
-                        {item.type}
+                        {(
+                          item.type === "healthy" ||
+                          item.type === "saludable" ||
+                          item.type === "Saludable" ||
+                          item.type === "Sano" ||
+                          item.type === "Sana"
+                        ) ? "Saludable" : item.type}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center mt-2">
@@ -1464,7 +1490,13 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                               : "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
                           }
                         >
-                          {item.type}
+                          {(
+                            item.type === "healthy" ||
+                            item.type === "saludable" ||
+                            item.type === "Saludable" ||
+                            item.type === "Sano" ||
+                            item.type === "Sana"
+                          ) ? "Saludable" : item.type}
                         </Badge>
                       </div>
                       <p className={`text-sm ${textMuted} mb-3`}>Analizado el {item.date}</p>
@@ -1554,7 +1586,13 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                               : "bg-emerald-900/20 text-emerald-400 border-emerald-900/50"
                           }
                         >
-                          {item.type}
+                          {(
+                            item.type === "healthy" ||
+                            item.type === "saludable" ||
+                            item.type === "Saludable" ||
+                            item.type === "Sano" ||
+                            item.type === "Sana"
+                          ) ? "Saludable" : item.type}
                         </Badge>
                       </div>
                       <p className={`text-sm ${textMuted} mb-3`}>Analizado el {item.date}</p>
@@ -1661,7 +1699,19 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a1929]/90 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4">
                   <Badge
-                    className={`bg-${selectedDisease.type === "Hongo" ? "amber" : selectedDisease.type === "Bacteria" ? "blue" : selectedDisease.type === "Virus" ? "red" : selectedDisease.type === "Mite" ? "purple" : "green"}-900/50 text-${selectedDisease.type === "Hongo" ? "amber" : selectedDisease.type === "Bacteria" ? "blue" : selectedDisease.type === "Virus" ? "red" : selectedDisease.type === "Mite" ? "purple" : "green"}-300`}
+                    className={`${
+                      selectedDisease.type === "Hongo"
+                        ? "bg-amber-900/50 text-amber-300"
+                        : selectedDisease.type === "Bacteria"
+                        ? "bg-blue-900/50 text-blue-300"
+                        : selectedDisease.type === "Virus"
+                        ? "bg-red-900/50 text-red-300"
+                        : selectedDisease.type === "Ácaro"
+                        ? "bg-purple-900/50 text-purple-300"
+                        : selectedDisease.type === "Deficiencia"
+                        ? "bg-green-900/50 text-green-300"
+                        : "bg-slate-900/50 text-slate-300"
+                    }`}
                   >
                     {selectedDisease.type}
                   </Badge>
@@ -1672,6 +1722,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             </div>
 
             <div className="md:col-span-2 space-y-6">
+              {/* Descripción */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Descripción</CardTitle>
@@ -1681,22 +1732,28 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 </CardContent>
               </Card>
 
+              {/* Síntomas */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Síntomas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {selectedDisease.symptoms.map((symptom: string, index: number) => (
-                      <li key={index} className={`flex items-start text-sm ${textSecondary}`}>
-                        <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                        <span>{symptom}</span>
-                      </li>
-                    ))}
+                    {selectedDisease.symptoms?.length > 0 ? (
+                      selectedDisease.symptoms.map((symptom: string, index: number) => (
+                        <li key={index} className={`flex items-start text-sm ${textSecondary}`}>
+                          <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
+                          <span>{symptom}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className={`text-sm ${textMuted}`}>No hay síntomas registrados.</li>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
 
+              {/* Recomendaciones: Tabs Orgánico/Químico */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Recomendaciones</CardTitle>
@@ -1717,165 +1774,31 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         Tratamiento Químico
                       </TabsTrigger>
                     </TabsList>
-
-                    <TabsContent value="organic" className="mt-4 space-y-4">
+                    <TabsContent value="organic" className="mt-4 space-y-2">
                       <ul className="space-y-2">
-                        {selectedDisease.type === "Hongo" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
+                        {selectedDisease.organic?.length > 0 ? (
+                          selectedDisease.organic.map((item: string, idx: number) => (
+                            <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar extracto de cola de caballo (rico en sílice) como preventivo</span>
+                              <span>{item}</span>
                             </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar bicarbonato de sodio diluido (1 cucharada por litro de agua)</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar aceite de neem como fungicida natural</span>
-                            </li>
-                          </>
-                        ) : selectedDisease.type === "Bacteria" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar infusión de ajo y cebolla como bactericida natural</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar purín de ortiga fermentado</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar compost de calidad para fortalecer la resistencia natural</span>
-                            </li>
-                          </>
-                        ) : selectedDisease.type === "Virus" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Control biológico de insectos vectores con depredadores naturales</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar extractos vegetales repelentes (ajo, chile, ruda)</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Eliminar plantas infectadas para prevenir propagación</span>
-                            </li>
-                          </>
-                        ) : selectedDisease.type === "Mite" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Liberar ácaros depredadores como Phytoseiulus persimilis</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar jabón potásico diluido en agua</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar aceite de neem como repelente natural</span>
-                            </li>
-                          </>
+                          ))
                         ) : (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar compost rico en el nutriente deficiente</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar abonos verdes para mejorar la calidad del suelo</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar té de compost como fertilizante natural</span>
-                            </li>
-                          </>
+                          <li className={`text-sm ${textMuted}`}>No hay recomendaciones orgánicas.</li>
                         )}
                       </ul>
                     </TabsContent>
-
-                    <TabsContent value="chemical" className="mt-4 space-y-4">
+                    <TabsContent value="chemical" className="mt-4 space-y-2">
                       <ul className="space-y-2">
-                                               {selectedDisease.type === "Hongo" ? (
-                          <>
-                                                       <li className={`flex items-start text-sm ${textSecondary}`}>
+                        {selectedDisease.chemical?.length > 0 ? (
+                          selectedDisease.chemical.map((item: string, idx: number) => (
+                            <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
                               <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar fungicidas a base de cobre (oxicloruro de cobre)</span>
+                              <span>{item}</span>
                             </li>
-                            <li className={`flex items-start text-sm ${accentColor} mt-0.5 mr-1 flex-shrink-0`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar fungicidas sistémicos como Difenoconazol</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar fungicidas protectores como Mancozeb</span>
-                            </li>
-                          </>
-                        ) : selectedDisease.type === "Bacteria" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar bactericidas a base de cobre (sulfato de cobre)</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${accentColor} mt-0.5 mr-1 flex-shrink-0`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar antibióticos agrícolas como la estreptomicina</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar compuestos de amonio cuaternario</span>
-                            </li>
-                          </>
-                        ) : selectedDisease.type === "Virus" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar insecticidas para controlar vectores (pulgones, trips)</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar aceites minerales para prevenir transmisión</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>No existe tratamiento químico directo para virus vegetales</span>
-                            </li>
-                          </>
-                        ) : selectedDisease.type === "Mite" ? (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar acaricidas específicos como Abamectina</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar azufre en polvo o líquido</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar aceites minerales de verano</span>
-                            </li>
-                          </>
+                          ))
                         ) : (
-                          <>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar fertilizantes foliares con el nutriente deficiente</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Utilizar quelatos específicos (EDDHA para hierro, etc.)</span>
-                            </li>
-                            <li className={`flex items-start text-sm ${textSecondary}`}>
-                              <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                              <span>Aplicar correctores de pH si la deficiencia es por bloqueo</span>
-                            </li>
-                          </>
+                          <li className={`text-sm ${textMuted}`}>No hay tratamientos químicos.</li>
                         )}
                       </ul>
                     </TabsContent>
@@ -1883,107 +1806,31 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 </CardContent>
               </Card>
 
+              {/* Qué lo causó y Medidas preventivas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                   <CardHeader className="pb-2">
                     <CardTitle className={`${textColor}`}>Qué lo causó</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className={`${textSecondary}`}>
-                      {selectedDisease.type === "Hongo"
-                        ? "Hongos patógenos que se desarrollan en condiciones de alta humedad y temperaturas moderadas. La infección se propaga por esporas transportadas por el viento, agua o insectos."
-                        : selectedDisease.type === "Bacteria"
-                          ? "Bacterias patógenas que ingresan a través de heridas, estomas o por insectos vectores. Se favorecen en ambientes húmedos y cálidos, propagándose rápidamente en condiciones de lluvia."
-                          : selectedDisease.type === "Virus"
-                            ? "Virus transmitidos principalmente por insectos vectores como pulgones, trips o mosca blanca. También pueden transmitirse por herramientas contaminadas o injertos."
-                            : selectedDisease.type === "Mite"
-                              ? "Ácaros microscópicos que se alimentan de la savia de las plantas. Proliferan en condiciones secas y cálidas, y su población puede aumentar rápidamente en ausencia de depredadores naturales."
-                              : "Falta de nutrientes esenciales en el suelo, pH inadecuado que bloquea la absorción de nutrientes, o daño en las raíces que impide la correcta absorción de elementos minerales."}
-                    </p>
+                    <p className={`${textSecondary}`}>{selectedDisease.cause || "No disponible."}</p>
                   </CardContent>
                 </Card>
-
                 <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                   <CardHeader className="pb-2">
                     <CardTitle className={`${textColor}`}>Medidas preventivas</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {selectedDisease.type === "Hongo" ? (
-                        <>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
+                      {selectedDisease.prevention?.length > 0 ? (
+                        selectedDisease.prevention.map((item: string, idx: number) => (
+                          <li key={idx} className={`flex items-start text-sm ${textSecondary}`}>
                             <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Mantener buena circulación de aire entre plantas</span>
+                            <span>{item}</span>
                           </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Evitar mojar el follaje al regar</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Eliminar y destruir hojas y frutos infectados</span>
-                          </li>
-                        </>
-                      ) : selectedDisease.type === "Bacteria" ? (
-                        <>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Utilizar herramientas desinfectadas</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Evitar trabajar con plantas cuando están mojadas</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Utilizar variedades resistentes cuando sea posible</span>
-                          </li>
-                        </>
-                      ) : selectedDisease.type === "Virus" ? (
-                        <>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Controlar poblaciones de insectos vectores</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${accentColor} mt-0.5 mr-1 flex-shrink-0`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Utilizar semillas y material de propagación certificado</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Desinfectar herramientas entre plantas</span>
-                          </li>
-                        </>
-                      ) : selectedDisease.type === "Mite" ? (
-                        <>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Mantener niveles adecuados de humedad</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Fomentar la presencia de enemigos naturales</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Inspeccionar regularmente las plantas</span>
-                          </li>
-                        </>
+                        ))
                       ) : (
-                        <>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Realizar análisis de suelo periódicos</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Mantener niveles adecuados de materia orgánica</span>
-                          </li>
-                          <li className={`flex items-start text-sm ${textSecondary}`}>
-                            <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                            <span>Aplicar enmiendas para corregir el pH si es necesario</span>
-                          </li>
-                        </>
+                        <li className={`text-sm ${textMuted}`}>No hay medidas preventivas.</li>
                       )}
                     </ul>
                   </CardContent>

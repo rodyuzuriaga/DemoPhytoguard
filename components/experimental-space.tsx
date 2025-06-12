@@ -868,8 +868,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                     <Image
                       src={item.image || "/placeholder.svg"}
                       alt={item.name}
-                      width={48}
-                      height={48}
+                      fill
                       className="object-cover"
                     />
                   </div>
@@ -902,7 +901,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-[#132f4c] hover:text-white"
+                          className="hover:bg-[#132f4c] hover:text-[#e7ebf0] text-[#e7ebf0]"
                           onClick={() => toggleArchive(item.id)}
                         >
                           <Archive className="h-3 w-3" />
@@ -911,7 +910,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-[#132f4c] hover:text-red-400"
+                          className="hover:bg-[#132f4c] hover:text-red-400 text-[#e7ebf0]"
                           onClick={() => deleteDiagnostic(item.id)}
                         >
                           <Trash2 className="h-3 w-3" />

@@ -60,6 +60,7 @@ interface DiagnosticItem {
   disease?: string
   image: string
   archived: boolean
+  confidence?: number
 }
 
 interface ModelMetric {
@@ -287,10 +288,10 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       severity: d.nivel_severidad,
       description: d.descripcion,
       symptoms: d.sintomas,
-      organic: d.recomendaciones_organico, // <--- DINÁMICO
-      chemical: d.tratamiento_quimico,     // <--- DINÁMICO
-      cause: d.causa,                      // <--- DINÁMICO
-      prevention: d.medidas_preventivas,   // <--- DINÁMICO
+      organic: d.recomendaciones_organico,
+      chemical: d.tratamiento_quimico,
+      cause: d.causa,
+      prevention: d.medidas_preventivas,
       treatment: [...d.recomendaciones_organico, ...d.tratamiento_quimico],
       image: d.imagen || "/placeholder.svg?height=200&width=200"
     }))
@@ -563,6 +564,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
         disease: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
         image: processedImage || "/placeholder.svg?height=100&width=100",
         archived: false,
+        confidence: detection.confidence || 0, 
       };
       setDiagnostics((prev) => [newDiagnostic, ...prev]);
       if (notificationsEnabled) {
@@ -1708,7 +1710,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         ? "bg-red-900/50 text-red-300"
                         : selectedDisease.type === "Ácaro"
                         ? "bg-purple-900/50 text-purple-300"
-                        : selectedDisease.type === "Deficiencia"
+                        : selectedDisease.type === "Deficiencia"                       
                         ? "bg-green-900/50 text-green-300"
                         : "bg-slate-900/50 text-slate-300"
                     }`}
@@ -2318,20 +2320,26 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </DialogHeader>
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-4">
+              {/* Imagen y nombre */}
               <div className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-amber-900/50 max-w-md mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent z-10"></div>
                 <Image
                   src={selectedDiagnostic?.image || "/placeholder.svg"}
-                  alt="Imagen procesada"
+                  alt={selectedDiagnostic?.name || "Imagen procesada"}
                   fill
                   className="object-contain"
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                  <p className="text-white font-bold text-lg">Roña del manzano</p>
-                  <p className="text-amber-200 text-sm">Confianza: 98.7%</p>
+                  <p className="text-white font-bold text-lg">{selectedDiagnostic?.disease || selectedDiagnostic?.name}</p>
+                  {selectedDiagnostic?.confidence !== undefined && (
+                    <p className="text-amber-200 text-sm">
+                      Confianza: {(selectedDiagnostic.confidence * 100).toFixed(1)}%
+                    </p>
+                  )}
                 </div>
               </div>
 
+              {/* Info principal */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Información de la muestra</CardTitle>
@@ -2340,86 +2348,127 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className={`text-sm ${textMuted}`}>Planta</p>
-                      <p className={`font-medium ${textColor}`}>Manzana</p>
+                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.name}</p>
                     </div>
                     <div>
                       <p className={`text-sm ${textMuted}`}>Estado</p>
-                      <p className="font-medium text-amber-400">Infectada</p>
+                      <p className={`font-medium ${selectedDiagnostic?.status === "infectada" ? "text-amber-400" : "text-emerald-400"}`}>
+                        {selectedDiagnostic?.status === "infectada" ? "Infectada" : "Saludable"}
+                      </p>
                     </div>
                     <div>
                       <p className={`text-sm ${textMuted}`}>Fecha de análisis</p>
-                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.date || "Hoy"}</p>
+                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.date || "-"}</p>
                     </div>
                     <div>
                       <p className={`text-sm ${textMuted}`}>Tipo</p>
-                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.type || "Hongo"}</p>
+                      <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.type || "-"}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Descripción dinámica */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Descripción</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className={`text-sm ${textSecondary}`}>
-                    La roña del manzano es una enfermedad fúngica causada por Venturia inaequalis. Se caracteriza por
-                    lesiones oscuras y escamosas en la superficie de la fruta.
+                    {/* Si es diagnóstico de prueba, poner texto estático, si no, buscar en DISEASES */}
+                    {(() => {
+                      const pruebas = ["Manzana", "Naranja", "Uva", "Pera", "Fresa"];
+                      if (selectedDiagnostic && pruebas.includes(selectedDiagnostic.name)) {
+                        if (selectedDiagnostic.name === "Manzana") return "La roña del manzano es una enfermedad fúngica causada por Venturia inaequalis. Se caracteriza por lesiones oscuras y escamosas en la superficie de la fruta.";
+                        if (selectedDiagnostic.name === "Uva") return "El mildiu polvoriento es una enfermedad causada por hongos que afecta hojas y frutos de la vid, generando un polvo blanco y disminuyendo la calidad de la cosecha.";
+                        if (selectedDiagnostic.name === "Pera") return "El fuego bacteriano es una enfermedad grave causada por la bacteria Erwinia amylovora, que afecta perales y otros frutales de pepita.";
+                        if (selectedDiagnostic.name === "Fresa") return "Fresa saludable. No se detectaron síntomas de enfermedad.";
+                        if (selectedDiagnostic.name === "Naranja") return "Naranja saludable. No se detectaron síntomas de enfermedad.";
+                      }
+                      // Buscar en DISEASES
+                      const disease = DISEASES.find(d => d.nombre_mostrar === selectedDiagnostic?.disease || d.nombre_mostrar === selectedDiagnostic?.name);
+                      return disease?.descripcion || "No se encontró información de la enfermedad.";
+                    })()}
                   </p>
                 </CardContent>
               </Card>
 
+              {/* Recomendaciones dinámicas */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Recomendaciones</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    <li className={`flex items-start text-sm ${textSecondary}`}>
-                      <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                      <span>Aplicar fungicidas preventivos al inicio de la temporada</span>
-                    </li>
-                    <li className={`flex items-start text-sm ${textSecondary}`}>
-                      <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                      <span>Podar y destruir hojas infectadas para reducir la fuente de inóculo</span>
-                    </li>
-                    <li className={`flex items-start text-sm ${textSecondary}`}>
-                      <ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />
-                      <span>Mantener buena circulación de aire en el huerto</span>
-                    </li>
+                    {(() => {
+                      const pruebas = ["Manzana", "Uva", "Pera", "Fresa", "Naranja"];
+                      if (selectedDiagnostic && pruebas.includes(selectedDiagnostic.name)) {
+                        if (selectedDiagnostic.name === "Manzana") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Aplicar fungicidas preventivos al inicio de la temporada</li>,
+                          <li key="2" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Podar y destruir hojas infectadas para reducir la fuente de inóculo</li>,
+                          <li key="3" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Mantener buena circulación de aire en el huerto</li>
+                        ];
+                        if (selectedDiagnostic.name === "Uva") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Eliminar hojas y racimos afectados</li>,
+                          <li key="2" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Aplicar azufre en polvo como preventivo</li>
+                        ];
+                        if (selectedDiagnostic.name === "Pera") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Eliminar ramas afectadas y desinfectar herramientas</li>,
+                          <li key="2" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Aplicar productos cúpricos en invierno</li>
+                        ];
+                        if (selectedDiagnostic.name === "Fresa" || selectedDiagnostic.name === "Naranja") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />No se requieren recomendaciones. La planta está saludable.</li>
+                        ];
+                      }
+                      // Buscar en DISEASES
+                      const disease = DISEASES.find(d => d.nombre_mostrar === selectedDiagnostic?.disease || d.nombre_mostrar === selectedDiagnostic?.name);
+                      if (disease && disease.recomendaciones_organico?.length > 0) {
+                        return disease.recomendaciones_organico.map((rec, idx) => (
+                          <li key={idx} className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />{rec}</li>
+                        ));
+                      }
+                      return <li className={`text-sm ${textMuted}`}>No hay recomendaciones disponibles.</li>;
+                    })()}
                   </ul>
                 </CardContent>
               </Card>
 
+              {/* Plan de Tratamiento dinámico */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
-                  <CardTitle className={`${textColor}`}>Plan de Tratamiento Detallado</CardTitle>
+                  <CardTitle className={`${textColor}`}>Plan de Tratamiento</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className={`font-medium ${textColor}`}>Fase 1: Tratamiento Inicial</h4>
-                    <p className={`text-sm ${textSecondary}`}>
-                      Aplicar fungicida Captan (2g/L) cada 7-10 días durante las primeras 3 semanas.
-                    </p>
-                  </div>
-                  <Separator className="bg-[#1e4976]" />
-                  <div className="space-y-2">
-                    <h4 className={`font-medium ${textColor}`}>Fase 2: Control Cultural</h4>
-                    <p className={`text-sm ${textSecondary}`}>
-                      Podar y eliminar todas las ramas y hojas afectadas. Quemar o desechar lejos del huerto.
-                    </p>
-                  </div>
-                  <Separator className="bg-[#1e4976]" />
-                  <div className="space-y-2">
-                    <h4 className={`font-medium ${textColor}`}>Fase 3: Prevención</h4>
-                    <p className={`text-sm ${textSecondary}`}>
-                      Aplicar tratamiento preventivo en primavera antes de la apertura de yemas con cobre.
-                    </p>
-                  </div>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {(() => {
+                      const pruebas = ["Manzana", "Uva", "Pera"];
+                      if (selectedDiagnostic && pruebas.includes(selectedDiagnostic.name)) {
+                        if (selectedDiagnostic.name === "Manzana") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Fase 1: Tratamiento Inicial - Aplicar fungicida Captan (2g/L) cada 7-10 días durante las primeras 3 semanas.</li>,
+                          <li key="2" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Fase 2: Control Cultural - Podar y eliminar todas las ramas y hojas afectadas. Quemar o desechar lejos del huerto.</li>,
+                          <li key="3" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Fase 3: Prevención - Aplicar tratamiento preventivo en primavera antes de la apertura de yemas con cobre.</li>
+                        ];
+                        if (selectedDiagnostic.name === "Uva") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Aplicar azufre en polvo cada 10 días en época de riesgo</li>
+                        ];
+                        if (selectedDiagnostic.name === "Pera") return [
+                          <li key="1" className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />Aplicar productos cúpricos tras la poda y en brotación</li>
+                        ];
+                      }
+                      // Buscar en DISEASES
+                      const disease = DISEASES.find(d => d.nombre_mostrar === selectedDiagnostic?.disease || d.nombre_mostrar === selectedDiagnostic?.name);
+                      if (disease && disease.plan_tratamiento?.length > 0) {
+                        return disease.plan_tratamiento.map((plan, idx) => (
+                          <li key={idx} className={`flex items-start text-sm ${textSecondary}`}><ChevronRight className={`h-4 w-4 ${accentColor} mt-0.5 mr-1 flex-shrink-0`} />{plan}</li>
+                        ));
+                      }
+                      return <li className={`text-sm ${textMuted}`}>No hay plan de tratamiento disponible.</li>;
+                    })()}
+                  </ul>
                 </CardContent>
               </Card>
 
+              {/* Botones al pie: Cerrar y Consultar Experto */}
               <div className="flex justify-end space-x-2 pb-4">
                 <Button
                   variant="outline"
@@ -2428,12 +2477,20 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 >
                   Cerrar
                 </Button>
-                <Button
-                  className={`${buttonBg} ${buttonHover} text-white`}
-                  onClick={() => window.open("https://es.wikipedia.org/wiki/Wikipedia:Portada", "_blank")}
-                >
-                  Consultar Experto
-                </Button>
+                {(() => {
+                  const disease = DISEASES.find(d => d.nombre_mostrar === selectedDiagnostic?.disease || d.nombre_mostrar === selectedDiagnostic?.name);
+                  if (disease && disease.link_experto) {
+                    return (
+                      <Button
+                        className={`${buttonBg} ${buttonHover} text-white`}
+                        onClick={() => window.open(disease.link_experto, "_blank")}
+                      >
+                        Consultar Experto
+                      </Button>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             </div>
           </div>

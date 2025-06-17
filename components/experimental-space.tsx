@@ -520,7 +520,13 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       setAnalysisResult({
         nombre: disease ? disease.nombre_mostrar : (detection.class_name_es || detection.class_name_en || "Desconocido"),
         confianza: detection.confidence || 0,
-        planta: disease ? disease.afecta_a.join(", ") : "-",
+        planta: disease
+          ? disease.afecta_a.join(", ")
+          : (
+              detection.class_name_es
+                ? detection.class_name_es.split("___")[0]
+                : "-"
+            ),
         estado: detection.class_name_en && detection.class_name_en.toLowerCase().includes("healthy") ? "Saludable" : "Infectada",
         descripcion: disease ? disease.descripcion : "No se encontró información en la base de datos local.",
         recomendaciones: disease ? disease.recomendaciones_organico : [],
@@ -1272,28 +1278,43 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                         </Badge>
                       )}
                     </div>
-                    {/* Imagen procesada */}
+                    {/* Imagen procesada con gradiente, nombre y confianza */}
                     <div className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-amber-900/50">
+                      <div className="absolute inset-0 bg-gradient-to-t from-amber-900/70 to-transparent z-10"></div>
                       <Image
                         src={analysisResult.imagen || "/placeholder.svg"}
                         alt="Imagen procesada"
                         fill
                         className="object-contain"
                       />
-                    </div>
-                    {/* Info principal */}
-                    <div className="space-y-2">
-                      <h3 className={`text-xl font-bold ${textColor}`}>{analysisResult.nombre}</h3>
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <span className={`text-sm ${accentColor}`}>Confianza: {(analysisResult.confianza * 100).toFixed(1)}%</span>
-                        <span className={`text-sm ${textSecondary}`}>
-                          Planta: <span className="font-bold">{analysisResult.planta}</span>
-                        </span>
-                        <span className={`text-sm ${analysisResult.estado === "Saludable" ? "text-emerald-400" : "text-amber-400"}`}>
-                          Estado: <span className="font-bold">{analysisResult.estado}</span>
-                        </span>
+                      <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                        <p className="text-white font-bold text-lg">{analysisResult.nombre}</p>
+                        <p className="text-amber-200 text-sm">
+                          Confianza: {(analysisResult.confianza * 100).toFixed(1)}%
+                        </p>
                       </div>
                     </div>
+                    {/* Información de la muestra en Card */}
+                    <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className={`${textColor}`}>Información de la muestra</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className={`text-sm ${textMuted}`}>Planta</p>
+                            <p className={`font-medium ${textColor}`}>{analysisResult.planta}</p>
+                          </div>
+                          <div>
+                            <p className={`text-sm ${textMuted}`}>Estado</p>
+                            <p className={`font-medium ${analysisResult.estado === "Saludable" ? "text-emerald-400" : "text-amber-400"}`}>
+                              {analysisResult.estado}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
                     {/* Descripción */}
                     <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                       <CardHeader className="pb-2">
@@ -2339,7 +2360,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 </div>
               </div>
 
-              {/* Info principal */}
+              {/* Información de la muestra en Card */}
               <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm`}>
                 <CardHeader className="pb-2">
                   <CardTitle className={`${textColor}`}>Información de la muestra</CardTitle>
@@ -2347,7 +2368,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className={`text-sm ${textMuted}`}>Planta</p>
+                      <p className={`text-sm ${textMuted}`}>Nombre</p>
                       <p className={`font-medium ${textColor}`}>{selectedDiagnostic?.name}</p>
                     </div>
                     <div>

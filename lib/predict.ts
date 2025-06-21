@@ -69,8 +69,8 @@ async function resizeImageToLetterbox(file: File, targetW: number, targetH: numb
 }
 
 // URLs de backend para cambiar fácilmente
-export const BACKEND_URL_LOCAL = "http://127.0.0.1:8000/predict";
-// export const BACKEND_URL_AZURE = "https://phytoguard-backend.livelygrass-7ede0a85.canadacentral.azurecontainerapps.io/predict";
+// export const BACKEND_URL_LOCAL = "http://127.0.0.1:8000/predict";
+export const BACKEND_URL_AZURE = "https://phytoguard-backend.livelygrass-7ede0a85.canadacentral.azurecontainerapps.io/predict";
 
 // Ejemplo de uso para probar en local:
 // import { predictImageFromFile, BACKEND_URL_LOCAL } from "@/lib/test_predict";

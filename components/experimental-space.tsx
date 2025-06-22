@@ -1990,8 +1990,12 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <span className="sr-only">Volver</span>
             </Button>
             <div>
-              <h1 className="text-xl font-bold text-[#66b2ff]">Espacio Experimental</h1>
-              <p className={textMuted}>Centro de monitoreo avanzado</p>
+              <h1 className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 dark:from-blue-300 dark:to-emerald-300">
+                Espacio Experimental
+              </h1>
+              <p className="text-xs sm:text-sm text-blue-600 dark:text-emerald-300">
+                Centro de monitoreo avanzado
+              </p>
             </div>
           </div>
 
@@ -2045,7 +2049,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm"
             onClick={() => setShowMobileMenu(false)}
           >
             <motion.div

@@ -474,7 +474,7 @@ export default function Home() {
           </div>
           <div className="relative h-64 md:h-auto">
             <Image
-              src="/placeholder.svg?height=400&width=600"
+              src="https://campodigital.es/wp-content/uploads/2025/02/plantix-app-in-use-1.jpg"
               alt="Arquitectura de la red neuronal"
               width={600}
               height={400}
@@ -531,7 +531,7 @@ export default function Home() {
                 </p>
                 <div className="relative w-full h-40 rounded-lg overflow-hidden mb-3">
                   <Image
-                    src="/placeholder.svg?height=160&width=400"
+                    src="https://www.editorialderiego.com/wp-content/uploads/2024/06/Poscosecha_01.jpg"
                     alt="Manzanas con sarna"
                     fill
                     className="object-cover"
@@ -612,7 +612,7 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div className="relative w-full h-32 rounded-lg overflow-hidden">
                     <Image
-                      src="/placeholder.svg?height=128&width=200"
+                      src="https://vinoycocina.es/wp-content/uploads/2022/01/naranjas.jpg"
                       alt="Naranjas saludables"
                       fill
                       className="object-cover"
@@ -620,7 +620,7 @@ export default function Home() {
                   </div>
                   <div className="relative w-full h-32 rounded-lg overflow-hidden">
                     <Image
-                      src="/placeholder.svg?height=128&width=200"
+                      src="https://img.freepik.com/fotos-premium/naranjas-frescas-colgando-arbol_218182-447.jpg"
                       alt="Árbol de naranjas"
                       fill
                       className="object-cover"
@@ -701,17 +701,17 @@ export default function Home() {
             <CardContent className="space-y-4">
               <div className="border-l-4 border-green-500 pl-3 py-1">
                 <h4 className="font-medium text-green-800 dark:text-green-300">Taller de Control de Plagas</h4>
-                <p className="text-sm text-green-600 dark:text-green-400">15 de Mayo, 10:00 AM</p>
+                <p className="text-sm text-green-600 dark:text-green-400">15 de Julio, 10:00 AM</p>
                 <p className="text-xs">Centro Comunitario del Valle</p>
               </div>
               <div className="border-l-4 border-amber-500 pl-3 py-1">
                 <h4 className="font-medium text-green-800 dark:text-green-300">Feria Agrícola Anual</h4>
-                <p className="text-sm text-green-600 dark:text-green-400">22-24 de Mayo</p>
+                <p className="text-sm text-green-600 dark:text-green-400">22-24 de Julio</p>
                 <p className="text-xs">Parque Central</p>
               </div>
               <div className="border-l-4 border-blue-500 pl-3 py-1">
                 <h4 className="font-medium text-green-800 dark:text-green-300">Webinar: Nuevas Tecnologías</h4>
-                <p className="text-sm text-green-600 dark:text-green-400">30 de Mayo, 7:00 PM</p>
+                <p className="text-sm text-green-600 dark:text-green-400">30 de Julio, 7:00 PM</p>
                 <p className="text-xs">Online (Zoom)</p>
               </div>
             </CardContent>
@@ -825,7 +825,7 @@ export default function Home() {
                         </Badge>
                       </div>
                       <p className="text-sm text-green-600 dark:text-green-400 mb-3">
-                        Analizado el 5 de Mayo, 2025 - 10:23 AM
+                        Analizado el 5 de Julio, 2025 - 10:23 AM
                       </p>
                       <div className="flex justify-between items-center">
                         <Button
@@ -905,7 +905,7 @@ export default function Home() {
                         </Badge>
                       </div>
                       <p className="text-sm text-green-600 dark:text-green-400 mb-3">
-                        Analizado el 4 de Mayo, 2025 - 3:45 PM
+                        Analizado el 4 de Julio, 2025 - 3:45 PM
                       </p>
                       <div className="flex justify-between items-center">
                         <Button
@@ -985,7 +985,7 @@ export default function Home() {
                         </Badge>
                       </div>
                       <p className="text-sm text-green-600 dark:text-green-400 mb-3">
-                        Analizado el 2 de Mayo, 2025 - 9:12 AM
+                        Analizado el 2 de Julio, 2025 - 9:12 AM
                       </p>
                       <div className="flex justify-between items-center">
                         <Button
@@ -1208,7 +1208,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm"
           onClick={() => setShowMobileMenu(false)}
         >
           <motion.div

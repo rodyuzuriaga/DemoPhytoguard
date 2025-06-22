@@ -1990,10 +1990,10 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <span className="sr-only">Volver</span>
             </Button>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 dark:from-blue-300 dark:to-emerald-300">
+              <h1 className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#338eda] to-[#66b2ff]">
                 Espacio Experimental
               </h1>
-              <p className="text-xs sm:text-sm text-blue-600 dark:text-emerald-300">
+              <p className="text-xs sm:text-sm text-[#7a8b9a]">
                 Centro de monitoreo avanzado
               </p>
             </div>

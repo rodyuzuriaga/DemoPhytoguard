@@ -1525,12 +1525,6 @@ export const DISEASES: DiseaseInfo[] = [
       "Asegurar una nutrición equilibrada y un riego adecuado."
     ],
     link_experto: "https://ctga.org/wp-content/uploads/2022/11/health4.pdf",
-    imagen: "https://www.richardjacksonsgarden.co.uk/wp-content/uploads/2021/04/AdobeStock_554658202_1200px.jpg"
+    imagen: "https://mejorconsalud.as.com/wp-content/uploads/2018/07/tomate.jpg"
   }
 ];
-
-// ---
-// Notas extras:
-// - No incluyas la fecha de análisis ni la confianza aquí, eso es dinámico y lo pone el frontend según el resultado del backend.
-// - El nombre de la imagen de salida debe generarse en el frontend como `${nombre_original}_box.jpg` para evitar sobrescribir archivos.
-// - Si hay muchos usuarios, puedes guardar las imágenes en una carpeta por usuario/sesión o usar un identificador único (ej: timestamp o uuid).

@@ -1415,7 +1415,7 @@ export default function Home() {
                   className="hidden md:flex bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700"
                 >
                   <BarChart3 className="h-3 w-3 mr-1" />
-                  Demo para Inversores
+                  Demo
                 </Badge>
                 <Button
                   variant="ghost"

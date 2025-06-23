@@ -2036,7 +2036,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <Settings className="h-5 w-5" />
               <span className="sr-only">Configuración</span>
             </Button>
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="text-[#e7ebf0] hover:text-white"
@@ -2044,7 +2044,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             >
               {isDarkTheme ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               <span className="sr-only">Cambiar tema</span>
-            </Button>
+            </Button>*/}
           </div>
         </div>
       </header>

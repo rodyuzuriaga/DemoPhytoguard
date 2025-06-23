@@ -1989,11 +1989,18 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Volver</span>
             </Button>
-            <div>
-              <h1 className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#66b2ff] to-[#338eda]">
+            <div className="min-w-0">
+              <h1
+                className="text-base sm:text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#66b2ff] to-[#338eda] truncate"
+                style={{ lineHeight: 1.2, maxWidth: '60vw' }}
+                title="Espacio Experimental"
+              >
                 Espacio Experimental
               </h1>
-              <p className="text-xs sm:text-sm text-[#7a8b9a]">
+              <p
+                className="text-xs sm:text-sm text-[#7a8b9a] truncate"
+                style={{ maxWidth: '60vw' }}
+              >
                 Centro de monitoreo avanzado
               </p>
             </div>

@@ -1990,7 +1990,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <span className="sr-only">Volver</span>
             </Button>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#338eda] to-[#66b2ff]">
+              <h1 className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#66b2ff] to-[#338eda]">
                 Espacio Experimental
               </h1>
               <p className="text-xs sm:text-sm text-[#7a8b9a]">
@@ -2522,29 +2522,83 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Camera Modal */}
-      {showCameraModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="bg-[#132f4c] rounded-lg p-4 flex flex-col items-center relative">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="rounded-lg border-2 border-[#1e4976] mb-4 max-w-full max-h-[60vh]"
-              style={{ width: 400, height: 300 }}
-            />
-            <Button className={`${buttonBg} ${buttonHover} text-white w-full mb-2`} onClick={captureImage}>
-              <span className="flex items-center">
-                <Camera className="mr-2 h-5 w-5" />
-                {isCameraActive ? "Tomar Foto" : "Abrir cámara"}
-              </span>
-            </Button>
-            <Button variant="outline" className="w-full" onClick={() => {
-              if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop())
-                setCameraStream(null)
+    {/* Camera Modal */}
+    {showCameraModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div className="bg-[#132f4c] rounded-lg p-4 flex flex-col items-center relative">
+          {/* Al abrir el modal, la cámara se activa automáticamente */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="rounded-lg border-2 border-[#1e4976] mb-4 max-w-full max-h-[60vh]"
+            style={{ width: 400, height: 300 }}
+          />
+          <Button
+            className={`${buttonBg} ${buttonHover} text-white w-full mb-2`}
+            onClick={async () => {
+              // Si la cámara no está activa, la activa
+              if (!isCameraActive) {
+                try {
+                  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                  setCameraStream(stream);
+                  setIsCameraActive(true);
+                  if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                  }
+                } catch (err) {
+                  toast({
+                    title: "Permiso denegado",
+                    description: "No se pudo acceder a la cámara. Por favor acepta el permiso en tu navegador.",
+                    variant: "destructive",
+                  });
+                }
+                return;
               }
-              setIsCameraActive(false)
+              // Si la cámara ya está activa, toma la foto
+              if (videoRef.current) {
+                const video = videoRef.current;
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                  const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                  setSelectedImage(dataUrl);
+                  setAnalysisResult(null);
+                  if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    setCameraStream(null);
+                    setIsCameraActive(false);
+                  }
+                  setTimeout(() => {
+                    analyzeImage();
+                  }, 100);
+                  if (notificationsEnabled) {
+                    toast({
+                      title: "Imagen capturada",
+                      description: "La imagen ha sido capturada correctamente.",
+                    });
+                  }
+                }
+              }
+            }}
+          >
+            <span className="flex items-center">
+              <Camera className="mr-2 h-5 w-5" />
+              {isCameraActive ? "Tomar Foto" : "Abrir cámara"}
+            </span>
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                setCameraStream(null);
+              }
+              setIsCameraActive(false);
             }}>
               Cancelar
             </Button>

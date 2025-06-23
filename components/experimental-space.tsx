@@ -1978,7 +1978,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     <div className={`min-h-screen ${bgColor} transition-colors duration-300`}>
       {/* Header */}
       <header className={`sticky top-0 z-50 w-full border-b border-[#1e4976] bg-[#0a1929]/80 backdrop-blur-sm`}>
-        <div className="container flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between w-full px-2 sm:px-4">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -2162,8 +2162,8 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="container py-6">
-        <div className="flex flex-col md:flex-row gap-6">
+      <main className="w-full py-6 px-2 sm:px-4">
+        <div className="flex flex-col md:flex-row gap-6 w-full">
           {/* Sidebar (visible en desktop) */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm sticky top-20`}>
@@ -2240,7 +2240,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {activeSection === "dashboard" && renderDashboard()}
             {activeSection === "analyzer" && renderAnalyzer()}
             {activeSection === "diagnostics" && renderDiagnostics()}

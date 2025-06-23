@@ -2011,7 +2011,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-[#e7ebf0] hover:text-white md:hidden"
+                className="text-[#132f4c] hover:text-white md:hidden"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
               >
                 <Menu className="h-5 w-5" />
@@ -2021,7 +2021,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-[#e7ebf0] hover:text-white"
+              className="text-[#132f4c] hover:text-white"
               onClick={() => setShowHelpDialog(true)}
             >
               <HelpCircle className="h-5 w-5" />
@@ -2030,7 +2030,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-[#e7ebf0] hover:text-white"
+              className="text-[#132f4c] hover:text-white"
               onClick={() => setShowSettingsDialog(true)}
             >
               <Settings className="h-5 w-5" />

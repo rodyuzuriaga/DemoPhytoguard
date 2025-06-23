@@ -805,7 +805,7 @@ export default function Home() {
                   <div className="flex flex-col md:flex-row">
                     <div className="relative w-full md:w-32 h-32 md:h-auto">
                       <Image
-                        src="https://content.peat-cloud.com/w400/apple-scab-apple-4.jpg"
+                        src="https://herbariofitopatologia.agro.uba.ar/wp-content/uploads/2018/08/Venturia-inaequalis-1.jpg"
                         alt="Manzana con sarna"
                         fill
                         className="object-cover"
@@ -885,7 +885,7 @@ export default function Home() {
                   <div className="flex flex-col md:flex-row">
                     <div className="relative w-full md:w-32 h-32 md:h-auto">
                       <Image
-                        src="https://camposdelabuelo.com/cdn/shop/articles/portadas_OK_blog_1080_x_800_px_ok.png?v=1719610694&width=1080"
+                        src="https://campograndeperu.com/wp-content/uploads/2024/03/para-que-sirve-la-hoja-de-naranja.jpg"
                         alt="Naranja saludable"
                         fill
                         className="object-cover"

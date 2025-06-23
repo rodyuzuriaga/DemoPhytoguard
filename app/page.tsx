@@ -450,7 +450,7 @@ export default function Home() {
               Arquitectura de la Red Neuronal
             </h3>
             <p className="text-green-700 dark:text-green-300 mb-4">
-              Nuestra red neuronal convolucional (CNN) utiliza una arquitectura de vanguardia basada en EfficientNet,
+              Nuestra red neuronal convolucional (CNN) utiliza una arquitectura de vanguardia basada en YOLOV9c,
               optimizada específicamente para la identificación de enfermedades en frutas.
             </p>
             <ul className="space-y-2">

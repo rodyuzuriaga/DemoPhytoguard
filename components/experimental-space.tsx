@@ -2049,7 +2049,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
             onClick={() => setShowMobileMenu(false)}
           >
             <motion.div

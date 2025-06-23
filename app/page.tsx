@@ -805,7 +805,7 @@ export default function Home() {
                   <div className="flex flex-col md:flex-row">
                     <div className="relative w-full md:w-32 h-32 md:h-auto">
                       <Image
-                        src="/placeholder.svg?height=128&width=128"
+                        src="https://content.peat-cloud.com/w400/apple-scab-apple-4.jpg"
                         alt="Manzana con sarna"
                         fill
                         className="object-cover"
@@ -885,7 +885,7 @@ export default function Home() {
                   <div className="flex flex-col md:flex-row">
                     <div className="relative w-full md:w-32 h-32 md:h-auto">
                       <Image
-                        src="/placeholder.svg?height=128&width=128"
+                        src="https://camposdelabuelo.com/cdn/shop/articles/portadas_OK_blog_1080_x_800_px_ok.png?v=1719610694&width=1080"
                         alt="Naranja saludable"
                         fill
                         className="object-cover"
@@ -965,7 +965,7 @@ export default function Home() {
                   <div className="flex flex-col md:flex-row">
                     <div className="relative w-full md:w-32 h-32 md:h-auto">
                       <Image
-                        src="/placeholder.svg?height=128&width=128"
+                        src="https://cdn.shopk.it/usercontent/grohoespana/media/images/8c494ba-oido-plantas.jpg"
                         alt="Uva con mildiu"
                         fill
                         className="object-cover"
@@ -1208,7 +1208,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
           onClick={() => setShowMobileMenu(false)}
         >
           <motion.div

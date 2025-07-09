@@ -1493,7 +1493,7 @@ export const DISEASES: DiseaseInfo[] = [
     class_name_en: "Tomato___healthy",
     class_name_es: "Tomate___Sano",
     nombre_mostrar: "Tomate Sano",
-    categoria: "N/A",
+    categoria: "Saludable",
     estado: "Sano",
     afecta_a: ["Tomate"],
     nivel_severidad: "N/A",

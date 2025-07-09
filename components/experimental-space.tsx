@@ -663,7 +663,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     <div className="space-y-6">
       {/* Widgets superiores desplazables */}
       <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
-        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-60 ${cardBorder}`}>
+        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-56 ${cardBorder}`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <h3 className={`text-sm font-medium ${textColor}`}>Precisión</h3>
@@ -672,7 +672,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </CardContent>
         </Card>
 
-        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-60 ${cardBorder}`}>
+        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-56 ${cardBorder}`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <h3 className={`text-sm font-medium ${textColor}`}>Diagnósticos</h3>
@@ -681,7 +681,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </CardContent>
         </Card>
 
-        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-60 ${cardBorder}`}>
+        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-56 ${cardBorder}`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <h3 className={`text-sm font-medium ${textColor}`}>Ubicación</h3>
@@ -693,7 +693,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
           </CardContent>
         </Card>
 
-        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-60 ${cardBorder}`}>
+        <Card className={`${cardBg} backdrop-blur-sm flex-shrink-0 w-56 ${cardBorder}`}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <h3 className={`text-sm font-medium ${textColor}`}>Temperatura</h3>
@@ -2145,7 +2145,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <div className="mt-auto">
                   <Button
                     variant="outline"
-                    className="w-full border-[#1e4976] text-[#e7ebf0] hover:bg-[#132f4c] hover:text-white"
+                    className="w-full border-[#1e4976] text-[#0a1929] hover:bg-[#132f4c] hover:text-white"
                     onClick={() => {
                       setShowMobileMenu(false)
                       setShowSettingsDialog(true)
@@ -2162,7 +2162,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="w-full py-6 px-2 sm:px-4">
+      <main className="w-full pt-6 pb-12 px-2 sm:px-4">
         <div className="flex flex-col md:flex-row gap-6 w-full">
           {/* Sidebar (visible en desktop) */}
           <div className="hidden md:block w-64 flex-shrink-0">
@@ -2264,7 +2264,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <Label className="text-[#e7ebf0]">Tema Oscuro</Label>
                 <p className="text-sm text-[#7a8b9a]">Cambia entre tema claro y oscuro</p>
               </div>
-              <Switch checked={isDarkTheme} onCheckedChange={() => setIsDarkTheme(!isDarkTheme)} />
+              <Switch
+                checked={isDarkTheme}
+                onCheckedChange={() => setIsDarkTheme(!isDarkTheme)}
+                className="data-[state=checked]:bg-[#1976d2]"
+              />
             </div>
             <Separator className="bg-[#1e4976]" />
             <div className="flex items-center justify-between">
@@ -2272,7 +2276,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <Label className="text-[#e7ebf0]">Animaciones</Label>
                 <p className="text-sm text-[#7a8b9a]">Habilitar animaciones y actualizaciones en tiempo real</p>
               </div>
-              <Switch checked={animationsEnabled} onCheckedChange={toggleAnimations} />
+              <Switch
+                checked={isDarkTheme}
+                onCheckedChange={() => setIsDarkTheme(!isDarkTheme)}
+                className="data-[state=checked]:bg-[#1976d2]"
+              />
             </div>
             <Separator className="bg-[#1e4976]" />
             <div className="flex items-center justify-between">
@@ -2280,7 +2288,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <Label className="text-[#e7ebf0]">Notificaciones</Label>
                 <p className="text-sm text-[#7a8b9a]">Recibir notificaciones sobre análisis y actualizaciones</p>
               </div>
-              <Switch checked={notificationsEnabled} onCheckedChange={toggleNotifications} />
+              <Switch
+                checked={isDarkTheme}
+                onCheckedChange={() => setIsDarkTheme(!isDarkTheme)}
+                className="data-[state=checked]:bg-[#1976d2]"
+              />
             </div>
             <Separator className="bg-[#1e4976]" />
             <div className="flex items-center justify-between">
@@ -2288,7 +2300,11 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
                 <Label className="text-[#e7ebf0]">Almacenamiento Local</Label>
                 <p className="text-sm text-[#7a8b9a]">Guardar configuraciones y diagnósticos en el navegador</p>
               </div>
-              <Switch checked={storageEnabled} onCheckedChange={toggleStorage} />
+              <Switch
+                checked={isDarkTheme}
+                onCheckedChange={() => setIsDarkTheme(!isDarkTheme)}
+                className="data-[state=checked]:bg-[#1976d2]"
+              />
             </div>
           </div>
           <div className="flex justify-end">

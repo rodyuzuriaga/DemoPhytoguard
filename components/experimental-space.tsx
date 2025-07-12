@@ -1978,7 +1978,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
     <div className={`min-h-screen ${bgColor} transition-colors duration-300`}>
       {/* Header */}
       <header className={`sticky top-0 z-50 w-full border-b border-[#1e4976] bg-[#0a1929]/80 backdrop-blur-sm`}>
-        <div className="flex h-16 items-center justify-between w-full px-2 sm:px-4">
+        <div className="max-w-7xl mx-auto flex h-16 items-center justify-between w-full px-2 sm:px-4">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -2011,7 +2011,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-[#e7ebf0] hover:text-white md:hidden"
+                className="group text-[#e7ebf0] hover:text-white hover:bg-[#132f4c]"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
               >
                 <Menu className="h-5 w-5" />
@@ -2021,7 +2021,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-[#e7ebf0] hover:text-white"
+              className="group text-[#e7ebf0] hover:text-white hover:bg-[#132f4c]"
               onClick={() => setShowHelpDialog(true)}
             >
               <HelpCircle className="h-5 w-5" />
@@ -2030,7 +2030,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-[#e7ebf0] hover:text-white"
+              className="group text-[#e7ebf0] hover:text-white hover:bg-[#132f4c]"
               onClick={() => setShowSettingsDialog(true)}
             >
               <Settings className="h-5 w-5" />
@@ -2163,7 +2163,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
 
       {/* Main Content */}
       <main className="w-full pt-6 pb-12 px-2 sm:px-4">
-        <div className="flex flex-col md:flex-row gap-6 w-full">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
           {/* Sidebar (visible en desktop) */}
           <div className="hidden md:block w-64 flex-shrink-0">
             <Card className={`${cardBg} ${cardBorder} backdrop-blur-sm sticky top-20`}>

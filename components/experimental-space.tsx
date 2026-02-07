@@ -236,7 +236,7 @@ export default function ExperimentalSpace({ onExit }: ExperimentalSpaceProps) {
       type: "Saludable",
       date: "4 Mayo, 2025",
       status: "saludable",
-      image: "https://s.libertaddigital.com/2017/05/04/dekopon-fruit.jpg",
+      image: "https://huerto-en-casa.com/wp-content/uploads/2022/01/naranjo-en-maceta.jpg",
       archived: false,
     },
     {

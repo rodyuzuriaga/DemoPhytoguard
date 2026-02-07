@@ -99,7 +99,7 @@ export const DISEASES: DiseaseInfo[] = [
       "Monitoreo constante para detectar primeros síntomas."
     ],
     link_experto: "http://extension.cropsciences.illinois.edu/fruitveg/pdfs/806_Black_Rot_of_Apple-20015.pdf",
-    imagen: "https://eyouagro.com/nitropack_static/GhaDBUVOndLsFPXiTFGggwyXxhpvLBrk/assets/images/optimized/rev-ce48c26/eyouagro.com/wp-content/uploads/2021/08/pests-apple-scab-opt-edited.jpg"
+    imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5jI7t-Ru4NVIKI_f7Dcb43egnCzjYjYbQBA&s"
   },
   {
     id: 2,
